@@ -1,0 +1,6 @@
+# Disable automatic newline conversion.
+# The build id is a hash of the page contents, so changing any byte - including
+# rewriting LF as CRLF on checkout - silently changes the build id and makes the
+# "is local identical to what is live?" check meaningless. Git's default autocrlf
+# does exactly that, so it is turned off explicitly here.
+* -text

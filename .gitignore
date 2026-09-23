@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Test artifacts
+.playwright-data/
+test-results/
+
+# Runtime data (customer orders) - never commit it, and keep it from being
+# mistaken for source when the project is packaged
+data/
+
+# Local marker for the published app (holds an absolute path of this machine,
+# meaningless on any other machine)
+.wbapp_*.genie
+
+# WorkBuddy tooling metadata and session notes - internal to this machine,
+# not part of the project itself. Never push this to a shared repository:
+# the notes contain operational details (domains, publish mechanics) that
+# do not belong in a public repo.
+.workbuddy/
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+*.log

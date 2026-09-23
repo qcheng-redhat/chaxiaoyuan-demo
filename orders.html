@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>茶小院 · 订单后台</title>
+<style>
+  :root{
+    --bg:#faf7f2;
+    --card:#ffffff;
+    --ink:#2f2a25;
+    --muted:#837668;
+    --brand:#8b5e3c;
+    --brand-dark:#6b4526;
+    --accent:#d9b382;
+    --cream:#f2e8dc;
+    --line:#ece3d7;
+    --radius:16px;
+    --shadow:0 6px 24px rgba(107,69,38,.08);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,-apple-system,sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;text-decoration:none}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;font-size:14px}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+
+  header{
+    position:sticky;top:0;z-index:40;
+    background:rgba(250,247,242,.94);backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  nav{display:flex;align-items:center;justify-content:space-between;height:64px;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;font-size:17px;font-weight:700;white-space:nowrap}
+  .brand .dot{
+    width:28px;height:28px;border-radius:50%;
+    background:linear-gradient(140deg,var(--accent),var(--brand));
+    display:grid;place-items:center;font-size:15px;
+  }
+  .brand small{font-weight:500;color:var(--muted);font-size:14px}
+  .nav-right{display:flex;align-items:center;gap:18px;font-size:14px}
+  .live{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:13px}
+  .live i{width:7px;height:7px;border-radius:50%;background:#7a9a6b;display:inline-block}
+  .nav-right a{color:var(--brand);font-weight:600}
+  .nav-right .logout{background:none;border:0;padding:0;font-family:inherit;font-size:14px;font-weight:600;color:var(--brand);cursor:pointer}
+  .nav-right .logout:hover{text-decoration:underline}
+
+  .page{padding:28px 0 60px}
+
+  /* 指标卡 */
+  .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+  .metric{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px 20px;
+  }
+  .metric .lb{font-size:13px;color:var(--muted)}
+  .metric .vv{font-size:26px;font-weight:800;color:var(--brand);margin-top:4px;letter-spacing:-.5px}
+  .metric .vv small{font-size:14px;font-weight:600;margin-left:2px}
+
+  .grid{display:grid;grid-template-columns:1fr 320px;gap:22px;align-items:start}
+
+  /* 工具条 */
+  .toolbar{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:12px 16px;margin-bottom:16px;
+  }
+  .filter{
+    font-size:13.5px;font-weight:600;color:var(--muted);
+    border:1.5px solid var(--line);border-radius:999px;padding:6px 15px;transition:.16s;
+  }
+  .filter:hover{border-color:var(--accent)}
+  .filter.on{background:var(--brand);border-color:var(--brand);color:#fff}
+  .toolbar .sp{flex:1}
+  .tbtn{
+    font-size:13.5px;font-weight:600;color:var(--brand-dark);
+    background:var(--cream);border-radius:999px;padding:7px 16px;transition:.16s;
+  }
+  .tbtn:hover{background:#e8dbca}
+  .tbtn.ghost{background:transparent;border:1.5px solid var(--line);color:var(--muted)}
+  .tbtn.ghost:hover{border-color:var(--accent);color:var(--brand-dark)}
+
+  /* 订单卡 */
+  .order{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px 20px;margin-bottom:14px;transition:border-color .2s,box-shadow .2s;
+  }
+  .order:hover{border-color:var(--cream);box-shadow:var(--shadow)}
+  .order.st-new{border-left:4px solid #EF9F27}
+  .order.st-making{border-left:4px solid #85B7EB}
+  .order.st-done{border-left:4px solid #97C459;opacity:.82}
+  .order.st-canceled{border-left:4px solid #B4B2A9;opacity:.6}
+
+  .o-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .o-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .o-no{font-size:15px;font-weight:800;letter-spacing:.3px}
+  .st{font-size:12px;font-weight:700;border-radius:999px;padding:2px 11px;line-height:1.7}
+  .st-new{background:#FAEEDA;color:#854F0B}
+  .st-making{background:#E6F1FB;color:#185FA5}
+  .st-done{background:#EAF3DE;color:#3B6D11}
+  .st-canceled{background:#F1EFE8;color:#5F5E5A}
+  .o-pick{font-size:12.5px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:2px 10px}
+  .o-time{font-size:13px;color:var(--muted)}
+
+  .o-items{margin:14px 0 12px;border-top:1px dashed var(--line);padding-top:12px}
+  .oi{display:flex;align-items:baseline;gap:12px;padding:4px 0}
+  .oi-n{font-size:14.5px;font-weight:600;white-space:nowrap}
+  .oi-s{font-size:12.5px;color:var(--muted);flex:1;min-width:0}
+  .oi-p{font-size:14px;font-weight:700;color:var(--brand)}
+
+  .o-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    border-top:1px dashed var(--line);padding-top:12px}
+  .o-meta{font-size:12.5px;color:var(--muted);max-width:52%}
+  .o-total{font-size:15px;font-weight:800;color:var(--brand);white-space:nowrap}
+  .o-total span{font-size:13px;font-weight:500;color:var(--muted);margin-left:6px}
+  .o-act{display:flex;gap:8px;flex-wrap:wrap}
+  .abtn{font-size:13px;font-weight:600;border-radius:9px;padding:7px 15px;transition:.16s}
+  .a-main{background:var(--brand);color:#fff}
+  .a-main:hover{background:var(--brand-dark)}
+  .a-soft{background:var(--cream);color:var(--brand-dark)}
+  .a-soft:hover{background:#e8dbca}
+  .a-line{border:1.5px solid var(--line);color:var(--muted)}
+  .a-line:hover{border-color:#d9b382;color:var(--brand-dark)}
+
+  /* 侧栏 */
+  .side .panel{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px 22px;margin-bottom:16px;
+  }
+  .side h3{font-size:15px;font-weight:800;margin-bottom:14px}
+  .rank{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px dashed var(--line)}
+  .rank:last-child{border-bottom:none}
+  .rank .n{
+    width:22px;height:22px;border-radius:7px;background:var(--cream);color:var(--brand-dark);
+    font-size:12px;font-weight:800;display:grid;place-items:center;flex:none;
+  }
+  .rank .n.top{background:var(--brand);color:#fff}
+  .rank .nm{flex:1;font-size:14px;font-weight:600}
+  .rank .ct{font-size:13px;font-weight:700;color:var(--brand)}
+  .note{font-size:13px;color:var(--muted);line-height:1.85}
+  .note b{color:var(--ink);font-weight:700}
+  .note code{
+    background:var(--cream);border-radius:6px;padding:1px 6px;
+    font-size:12px;color:var(--brand-dark);
+  }
+  .empty{
+    background:var(--card);border:1px dashed var(--line);border-radius:var(--radius);
+    padding:64px 24px;text-align:center;color:var(--muted);font-size:14px;
+  }
+  .empty .e{font-size:44px;display:block;margin-bottom:12px;opacity:.55}
+  .empty .go{
+    display:inline-block;margin-top:16px;background:var(--brand);color:#fff;
+    font-size:14px;font-weight:700;padding:11px 26px;border-radius:999px;
+  }
+
+  #toast{
+    position:fixed;left:50%;top:84px;transform:translate(-50%,-14px);
+    background:var(--ink);color:#fff;font-size:14px;font-weight:600;
+    padding:11px 22px;border-radius:999px;z-index:120;
+    opacity:0;visibility:hidden;transition:.25s;pointer-events:none;
+  }
+  #toast.on{opacity:1;visibility:visible;transform:translate(-50%,0)}
+
+  @media(max-width:900px){
+    .grid{grid-template-columns:1fr}
+    .metrics{grid-template-columns:repeat(2,1fr)}
+  }
+  @media(max-width:560px){
+    .wrap{padding:0 16px}
+    .metric .vv{font-size:22px}
+    .o-meta{max-width:100%}
+  }
+</style>
+
+<script>
+/* Stale-cache self-heal. The publishing gateway caches responses per URL and has
+   served an out-of-date copy of a page after a deploy (old JS, which broke the
+   order dashboard). Every page now carries its build id; if the server reports a
+   different one, we reload once with ?v=<id> — a fresh cache key, so the gateway
+   goes back to the server for the current file. */
+window.__CX_BUILD__ = '__BUILD__';
+(function () {
+  try {
+    fetch('/api/version', { cache: 'no-store' })
+      .then(function (r) { return r.json(); })
+      .then(function (v) {
+        if (!v || !v.build || v.build === window.__CX_BUILD__) return;
+        var key = 'cx_reload_' + v.build;
+        try {
+          if (sessionStorage.getItem(key)) return;
+          sessionStorage.setItem(key, '1');
+        } catch (e) {}
+        var u = new URL(location.href);
+        u.searchParams.set('v', v.build);
+        location.replace(u.toString());
+      })
+      .catch(function () {});
+  } catch (e) {}
+})();
+</script>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <nav>
+      <div class="brand"><span class="dot">🧋</span>茶小院 <small>· 订单后台</small></div>
+      <div class="nav-right">
+        <span class="live"><i></i>实时同步中</span>
+        <a href="menu?v=__BUILD__">← 返回菜单页</a>
+        <a href="orders-en.html?v=__BUILD__">EN</a>
+        <button id="logoutBtn" class="logout" type="button" style="display:none">退出登录</button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap page">
+
+  <div class="metrics">
+    <div class="metric">
+      <div class="lb">今日订单</div>
+      <div class="vv" id="mOrders">0<small>单</small></div>
+    </div>
+    <div class="metric">
+      <div class="lb">今日营业额</div>
+      <div class="vv" id="mRevenue">¥0</div>
+    </div>
+    <div class="metric">
+      <div class="lb">待接单</div>
+      <div class="vv" id="mNew">0<small>单</small></div>
+    </div>
+    <div class="metric">
+      <div class="lb">平均客单价</div>
+      <div class="vv" id="mAvg">¥0</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="main">
+      <div class="toolbar">
+        <button class="filter on" data-f="all">全部</button>
+        <button class="filter" data-f="new">待接单</button>
+        <button class="filter" data-f="making">制作中</button>
+        <button class="filter" data-f="done">已完成</button>
+        <button class="filter" data-f="canceled">已取消</button>
+        <span class="sp"></span>
+        <button class="tbtn" id="btnExport">导出 CSV</button>
+        <button class="tbtn ghost" id="btnSeed">生成示例订单</button>
+        <button class="tbtn ghost" id="btnClear">清空</button>
+      </div>
+      <div id="list"></div>
+    </div>
+
+    <aside class="side">
+      <div class="panel">
+        <h3>今日热销</h3>
+        <div id="rank"></div>
+      </div>
+      <div class="panel">
+        <h3>这一版是怎么跑的</h3>
+        <p class="note">
+          顾客在菜单页提交订单后，订单会结构化汇总到这里，店家按状态流转接单。<br><br>
+          <b>云端模式</b>（通过 http/https 访问）：订单存在服务器上，换任何设备打开后台、输入管理口令都能看到同一份数据，每 10 秒自动刷新。<br><br>
+          <b>本机演示模式</b>（直接双击本地文件打开）：订单汇总在同一浏览器里，功能相同但不跨设备。
+        </p>
+      </div>
+      <div class="panel">
+        <h3>数据存在哪</h3>
+        <p class="note">
+          本机键名 <code>chaxiaoyuan_orders_v1</code>。<br>
+          菜单页里的 <code>ORDER_ENDPOINT</code> 留空即为演示模式，填上表单提交地址就会同步推送云端。
+        </p>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<div id="loginMask" class="mask"></div>
+<div id="login" style="position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:100;width:320px;max-width:90vw;background:#fff;border-radius:18px;padding:26px 24px;box-shadow:0 20px 60px rgba(47,42,37,.24);display:none">
+  <h3 style="font-size:17px;font-weight:800;text-align:center">店家登录</h3>
+  <p style="font-size:12.5px;color:var(--muted);text-align:center;margin-top:6px">云端模式下需要口令才能查看订单</p>
+  <input id="loginPwd" type="password" placeholder="管理口令" style="width:100%;font-family:inherit;font-size:14px;margin-top:14px;padding:10px 14px;border:1.5px solid var(--line);border-radius:10px;outline:none">
+  <button id="loginOk" style="width:100%;margin-top:12px;background:var(--brand);color:#fff;font-size:14px;font-weight:700;padding:11px;border-radius:10px">进入后台</button>
+  <div id="loginErr" style="font-size:12.5px;color:#c0563c;margin-top:10px;text-align:center;min-height:18px"></div>
+</div>
+<style>
+  #loginMask{position:fixed;inset:0;background:rgba(47,42,37,.45);z-index:99;opacity:0;visibility:hidden;transition:opacity .2s}
+  #loginMask.on{opacity:1;visibility:visible}
+  #login{transition:opacity .2s}
+  #login.on{display:block !important}
+</style>
+
+<div id="toast"></div>
+
+<script>
+(function(){
+  'use strict';
+
+  var ORDERS_KEY = 'chaxiaoyuan_orders_v1';
+
+  /* ---------- 云端后台（API 模式） ---------- */
+  var API_MODE = false;
+  var TOKEN = null;
+  var SIGNED_IN = false;
+  try{ TOKEN = sessionStorage.getItem('cy_token'); }catch(e){}
+  function authHeaders(){
+    var h = {};
+    if(TOKEN){
+      /* The publishing gateway REPLACES the Authorization header with its own JWT,
+       * so we lead with a custom header it leaves alone; the standard bearer is
+       * kept only as a fallback for plain local runs. */
+      h['X-Cy-Token'] = TOKEN;
+      h['Authorization'] = 'Bearer ' + TOKEN;
+    }
+    return h;
+  }
+  /* Send the token three ways (custom header + query + cookie) so auth survives
+   * whichever channel the proxy in front decides to rewrite. */
+  function apiUrl(p){
+    if(!TOKEN) return p;
+    return p + (p.indexOf('?') > -1 ? '&' : '?') + 'token=' + encodeURIComponent(TOKEN);
+  }
+  /* The cookie is only a backup transport channel for the token (the publishing gateway
+   * rewrites the Authorization header), so it must not outlive the browser session. With
+   * no max-age it is a session cookie: closing the browser logs the store out, instead of
+   * silently letting anyone who opens this page back in for a week. */
+  function saveToken(t){
+    TOKEN = t;
+    try{ sessionStorage.setItem('cy_token', t); }catch(e){}
+    try{ document.cookie = 'cy_token=' + encodeURIComponent(t) + '; path=/; SameSite=Lax'; }catch(e){}
+    setLoggedIn(true);
+  }
+  function clearToken(){
+    TOKEN = null;
+    try{ sessionStorage.removeItem('cy_token'); }catch(e){}
+    try{ document.cookie = 'cy_token=; path=/; max-age=0'; }catch(e){}
+  }
+  function setLoggedIn(on){
+    SIGNED_IN = !!on;
+    var b = document.getElementById('logoutBtn');
+    if(b) b.style.display = SIGNED_IN ? 'inline-block' : 'none';
+  }
+
+  var STATUS = {
+    new:      {label:'待接单', cls:'st-new'},
+    making:   {label:'制作中', cls:'st-making'},
+    done:     {label:'已完成', cls:'st-done'},
+    canceled: {label:'已取消', cls:'st-canceled'}
+  };
+
+  var MENU = [
+    {name:'黑糖珍珠鲜奶', price:16},
+    {name:'茉莉奶绿',     price:14},
+    {name:'芋泥波波奶茶', price:18},
+    {name:'杨枝甘露',     price:19},
+    {name:'古法烤奶茶',   price:15},
+    {name:'四季春柠檬茶', price:15},
+    {name:'纯茶',         price:10}
+  ];
+  var SPECS = ['少冰 · 半糖', '正常冰 · 七分糖', '去冰 · 三分糖', '热饮 · 半糖', '少冰 · 无糖 · 加珍珠', ''];
+
+  var filter = 'all';
+  var list = [];
+
+  var $ = function(s){ return document.querySelector(s); };
+  var $$ = function(s){ return Array.prototype.slice.call(document.querySelectorAll(s)); };
+  function money(n){ return '¥' + (Math.round(n * 100) / 100); }
+  function pad(x){ return String(x).length < 2 ? '0' + x : String(x); }
+  function esc(s){
+    return String(s == null ? '' : s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  var toastTimer = null;
+  function toast(msg){
+    var t = $('#toast');
+    t.textContent = msg;
+    t.classList.add('on');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ t.classList.remove('on'); }, 1800);
+  }
+
+  function dayKey(ts){
+    var d = new Date(ts);
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  }
+
+  function load(){
+    try{
+      var a = JSON.parse(localStorage.getItem(ORDERS_KEY) || '[]');
+      list = Array.isArray(a) ? a : [];
+    }catch(e){ list = []; }
+  }
+  function persist(){
+    try{ localStorage.setItem(ORDERS_KEY, JSON.stringify(list)); }catch(e){}
+  }
+
+  /* ---------- 云端模式：优先走 API，失败退回本机模式 ---------- */
+  function refresh(){
+    if(location.protocol !== 'http:' && location.protocol !== 'https:'){ load(); render(); return; }
+    fetch(apiUrl('/api/orders'), { headers: authHeaders() }).then(function(r){
+      if(r.status === 401){
+        // was logged in but the token got rejected -> tell the user instead of silently re-prompting
+        if(TOKEN){
+          clearToken();
+          $('#loginErr').textContent = '登录状态失效，请重新输入口令';
+        }
+        showLogin(); return null;
+      }
+      if(!r.ok) throw new Error('http ' + r.status);
+      return r.json();
+    }).then(function(d){
+      if(d && d.ok){ API_MODE = true; list = d.orders; render(); setLoggedIn(true); }
+    }).catch(function(){
+      if(!API_MODE){ load(); render(); }
+    });
+  }
+
+  function showLogin(){
+    setLoggedIn(false);
+    $('#loginMask').classList.add('on');
+    $('#login').classList.add('on');
+    setTimeout(function(){ var p = $('#loginPwd'); if(p) p.focus(); }, 100);
+  }
+  function hideLogin(){
+    $('#loginMask').classList.remove('on');
+    $('#login').classList.remove('on');
+    $('#loginPwd').value = '';
+    $('#loginErr').textContent = '';
+  }
+
+  function todayList(){
+    var k = dayKey(Date.now());
+    return list.filter(function(o){ return dayKey(o.ts) === k && o.status !== 'canceled'; });
+  }
+
+  function orderToText(o){
+    var lines = ['【茶小院 · ' + o.pick + '】', '订单号：' + o.no, '———————————'];
+    o.items.forEach(function(it){
+      lines.push(it.name + ' ×' + it.qty + '　' + money(it.unit * it.qty));
+      if(it.spec) lines.push('　　' + it.spec);
+    });
+    lines.push('———————————');
+    lines.push('合计：' + money(o.total) + '（' + o.qty + ' 件）');
+    if(o.phone) lines.push('手机号：' + o.phone);
+    if(o.note) lines.push('备注：' + o.note);
+    lines.push('下单时间：' + o.time);
+    return lines.join('\n');
+  }
+
+  function viewList(){
+    if(filter === 'all') return list;
+    return list.filter(function(o){ return o.status === filter; });
+  }
+
+  function renderMetrics(){
+    var t = todayList();
+    var revenue = t.reduce(function(a, o){ return a + o.total; }, 0);
+    var count = t.length;
+    $('#mOrders').innerHTML = count + '<small>单</small>';
+    $('#mRevenue').textContent = money(revenue);
+    $('#mNew').innerHTML = list.filter(function(o){ return o.status === 'new'; }).length + '<small>单</small>';
+    $('#mAvg').textContent = count ? money(revenue / count) : '¥0';
+  }
+
+  function renderRank(){
+    var map = {};
+    todayList().forEach(function(o){
+      o.items.forEach(function(it){
+        map[it.name] = (map[it.name] || 0) + it.qty;
+      });
+    });
+    var arr = Object.keys(map).map(function(k){ return {name:k, qty:map[k]}; });
+    arr.sort(function(a, b){ return b.qty - a.qty; });
+    arr = arr.slice(0, 5);
+
+    if(!arr.length){
+      $('#rank').innerHTML = '<p class="note">今天还没有卖出的记录</p>';
+      return;
+    }
+    $('#rank').innerHTML = arr.map(function(it, i){
+      return '<div class="rank">' +
+        '<span class="n' + (i === 0 ? ' top' : '') + '">' + (i + 1) + '</span>' +
+        '<span class="nm">' + esc(it.name) + '</span>' +
+        '<span class="ct">' + it.qty + ' 杯</span>' +
+      '</div>';
+    }).join('');
+  }
+
+  function actions(o){
+    if(o.status === 'new'){
+      return '<button class="abtn a-main" data-act="making" data-no="' + o.no + '">接单</button>' +
+             '<button class="abtn a-soft" data-act="copy" data-no="' + o.no + '">复制</button>' +
+             '<button class="abtn a-line" data-act="canceled" data-no="' + o.no + '">取消</button>';
+    }
+    if(o.status === 'making'){
+      return '<button class="abtn a-main" data-act="done" data-no="' + o.no + '">完成出餐</button>' +
+             '<button class="abtn a-soft" data-act="print" data-no="' + o.no + '">打印小票</button>' +
+             '<button class="abtn a-line" data-act="canceled" data-no="' + o.no + '">取消</button>';
+    }
+    if(o.status === 'done'){
+      return '<button class="abtn a-soft" data-act="print" data-no="' + o.no + '">打印小票</button>' +
+             '<button class="abtn a-soft" data-act="copy" data-no="' + o.no + '">复制</button>' +
+             '<button class="abtn a-line" data-act="del" data-no="' + o.no + '">删除</button>';
+    }
+    return '<button class="abtn a-soft" data-act="copy" data-no="' + o.no + '">复制</button>' +
+           '<button class="abtn a-line" data-act="del" data-no="' + o.no + '">删除</button>';
+  }
+
+  function render(){
+    var arr = viewList();
+
+    if(!arr.length){
+      var msg = list.length
+        ? '这个状态下暂时没有订单'
+        : '还没有收到订单';
+      $('#list').innerHTML =
+        '<div class="empty"><span class="e">🧋</span>' + msg +
+        (list.length ? '' : '<br>去菜单页下一单，或者点上面的「生成示例订单」看看效果') +
+        (list.length ? '' : '<br><a class="go" href="index.html?v=__BUILD__">打开菜单页 →</a>') +
+        '</div>';
+    }else{
+      $('#list').innerHTML = arr.map(function(o){
+        var st = STATUS[o.status] || STATUS.new;
+        var items = o.items.map(function(it){
+          return '<div class="oi">' +
+            '<span class="oi-n">' + esc(it.name) + ' ×' + it.qty + '</span>' +
+            '<span class="oi-s">' + esc(it.spec || '默认规格') + '</span>' +
+            '<span class="oi-p">' + money(it.unit * it.qty) + '</span>' +
+          '</div>';
+        }).join('');
+
+        var meta = [];
+        if(o.phone) meta.push('手机号 ' + esc(o.phone));
+        if(o.note)  meta.push('备注：' + esc(o.note));
+
+        return '<div class="order st-' + o.status + '">' +
+          '<div class="o-head">' +
+            '<div class="o-left">' +
+              '<span class="o-no">' + esc(o.no) + '</span>' +
+              '<span class="st ' + st.cls + '">' + st.label + '</span>' +
+              '<span class="o-pick">' + esc(o.pick) + '</span>' +
+            '</div>' +
+            '<span class="o-time">' + esc(o.time) + '</span>' +
+          '</div>' +
+          '<div class="o-items">' + items + '</div>' +
+          '<div class="o-foot">' +
+            '<div>' +
+              '<div class="o-total">' + money(o.total) + '<span>共 ' + o.qty + ' 件</span></div>' +
+              (meta.length ? '<div class="o-meta">' + meta.join('　·　') + '</div>' : '') +
+            '</div>' +
+            '<div class="o-act">' + actions(o) + '</div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    renderMetrics();
+    renderRank();
+  }
+
+  function find(no){
+    for(var i = 0; i < list.length; i++){ if(list[i].no === no) return list[i]; }
+    return null;
+  }
+
+  function setStatus(no, st){
+    var o = find(no);
+    if(!o) return;
+    o.status = st;
+    o.updatedAt = Date.now();
+    if(API_MODE){
+      fetch(apiUrl('/api/orders/' + encodeURIComponent(no) + '/status'), {
+        method:'PATCH',
+        headers: Object.assign({'Content-Type':'application/json'}, authHeaders()),
+        body: JSON.stringify({status: st})
+      }).catch(function(){});
+    }else{
+      persist();
+    }
+    render();
+    toast('订单 ' + no + ' → ' + STATUS[st].label);
+  }
+
+  function copyText(text, okMsg){
+    function fallback(){
+      var ta = document.createElement('textarea');
+      ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try{ document.execCommand('copy'); toast(okMsg); }
+      catch(e){ toast('复制失败，请手动选中复制'); }
+      document.body.removeChild(ta);
+    }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(function(){ toast(okMsg); }, fallback);
+    }else{ fallback(); }
+  }
+
+  function printOrder(o){
+    var w = window.open('', '_blank', 'width=380,height=640');
+    if(!w){ toast('浏览器拦截了弹窗，请允许后重试'); return; }
+    w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>' + esc(o.no) + '</title></head>' +
+      '<body style="margin:0;padding:14px;font-family:monospace,monospace;font-size:13px;line-height:1.8">' +
+      '<pre style="white-space:pre-wrap;margin:0">' + esc(orderToText(o)) + '</pre>' +
+      '<script>window.onload=function(){window.print();}<\/script></body></html>');
+    w.document.close();
+  }
+
+  function exportCSV(){
+    var rows = [['订单号','下单时间','取餐方式','手机号','商品明细','件数','金额','状态','备注']];
+    viewList().forEach(function(o){
+      rows.push([
+        o.no, o.time, o.pick, o.phone || '',
+        o.items.map(function(it){
+          return it.name + '×' + it.qty + (it.spec ? '(' + it.spec + ')' : '');
+        }).join(' / '),
+        o.qty, o.total, (STATUS[o.status] || STATUS.new).label, o.note || ''
+      ]);
+    });
+    if(rows.length === 1){ toast('当前没有可导出的订单'); return; }
+
+    var csv = rows.map(function(r){
+      return r.map(function(c){ return '"' + String(c).replace(/"/g, '""') + '"'; }).join(',');
+    }).join('\r\n');
+
+    var blob = new Blob(['\ufeff' + csv], {type:'text/csv;charset=utf-8'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = '茶小院订单_' + dayKey(Date.now()) + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1500);
+    toast('已导出 ' + (rows.length - 1) + ' 条订单');
+  }
+
+  function seedDemo(){
+    var picks = ['到店自取', '到店自取', '需要外送'];
+    var now = Date.now();
+    var picked = [0, 1, 2, 3].map(function(i){
+      var n = 1 + Math.floor(Math.random() * 2);
+      var items = [], total = 0, qty = 0;
+      for(var j = 0; j < n; j++){
+        var m = MENU[Math.floor(Math.random() * MENU.length)];
+        var q = 1 + Math.floor(Math.random() * 2);
+        items.push({name:m.name, qty:q, unit:m.price, spec:SPECS[Math.floor(Math.random() * SPECS.length)]});
+        total += m.price * q; qty += q;
+      }
+      var d = new Date(now - (i + 1) * (7 + Math.floor(Math.random() * 14)) * 60000);
+      return {
+        no: 'CY' + String(d.getFullYear()).slice(2) + pad(d.getMonth() + 1) + pad(d.getDate()) +
+            pad(d.getHours()) + pad(d.getMinutes()) + '-' + Math.floor(1000 + Math.random() * 9000),
+        ts: d.getTime(),
+        time: d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' +
+              pad(d.getHours()) + ':' + pad(d.getMinutes()),
+        pick: picks[Math.floor(Math.random() * picks.length)],
+        phone: '138' + Math.floor(10000000 + Math.random() * 89999999),
+        note: i === 2 ? '少放冰，打包分开装' : '',
+        items: items,
+        qty: qty,
+        total: total,
+        status: i === 0 ? 'new' : (i === 1 ? 'making' : 'done')
+      };
+    });
+
+    list = picked.concat(list);
+    persist(); render();
+    toast('已生成 4 条示例订单（演示数据）');
+  }
+
+  function clearAll(){
+    if(!list.length){ toast('本来就是空的'); return; }
+    if(!window.confirm('确定清空全部 ' + list.length + ' 条订单吗？此操作不可撤销（影响对账和销量统计）。')) return;
+    if(API_MODE){
+      fetch(apiUrl('/api/orders'), { method:'DELETE', headers: authHeaders() })
+        .then(function(r){ return r.json(); })
+        .then(function(d){ if(d && d.ok){ list = []; render(); toast('已清空全部订单'); } })
+        .catch(function(){ toast('连不上服务器'); });
+    }else{
+      list = [];
+      persist(); render();
+      toast('已清空全部订单');
+    }
+  }
+
+  $('#list').addEventListener('click', function(e){
+    var t = e.target.closest('[data-act]');
+    if(!t) return;
+    var act = t.getAttribute('data-act');
+    var no = t.getAttribute('data-no');
+    var o = find(no);
+    if(!o) return;
+
+    if(act === 'making')   setStatus(no, 'making');
+    if(act === 'done')     setStatus(no, 'done');
+    if(act === 'canceled') setStatus(no, 'canceled');
+    if(act === 'copy')     copyText(orderToText(o), '订单已复制，可发给顾客或后厨');
+    if(act === 'print')    printOrder(o);
+    if(act === 'del'){
+      if(!window.confirm('删除订单 ' + no + '？删除后无法恢复。')) return;
+      list = list.filter(function(x){ return x.no !== no; });
+      persist(); render();
+      toast('已删除 ' + no);
+    }
+  });
+
+  $$('.filter').forEach(function(b){
+    b.addEventListener('click', function(){
+      filter = b.getAttribute('data-f');
+      $$('.filter').forEach(function(x){ x.classList.remove('on'); });
+      b.classList.add('on');
+      render();
+    });
+  });
+
+  $('#btnExport').addEventListener('click', exportCSV);
+  $('#btnSeed').addEventListener('click', function(){
+    if(API_MODE){
+      fetch(apiUrl('/api/orders/seed'), { method:'POST', headers: authHeaders() })
+        .then(function(r){ if(r.status === 401){ showLogin(); return null; } return r.json(); })
+        .then(function(d){ if(d && d.ok){ list = d.orders; render(); toast('已生成示例订单'); } })
+        .catch(function(){ toast('连不上服务器'); });
+    }else{
+      seedDemo();
+    }
+  });
+  $('#btnClear').addEventListener('click', clearAll);
+
+  /* ---------- 店家登录 ---------- */
+  function doLogin(){
+    var pwd = $('#loginPwd').value;
+    if(!pwd){ $('#loginErr').textContent = '请输入口令'; return; }
+    fetch('/api/login', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({password: pwd})
+    }).then(function(r){ return r.json(); }).then(function(d){
+      if(d && d.ok){
+        saveToken(d.token);
+        hideLogin(); refresh();
+      }else{
+        $('#loginErr').textContent = (d && d.reason === 'not_configured')
+          ? '后台登录未配置：服务器没有设置 ADMIN_PASSWORD（顾客点单不受影响）'
+          : '口令不对，再试一次';
+      }
+    }).catch(function(){ $('#loginErr').textContent = '连不上服务器'; });
+  }
+  $('#loginOk').addEventListener('click', doLogin);
+  $('#loginPwd').addEventListener('keydown', function(e){
+    if(e.key === 'Enter') doLogin();
+  });
+  $('#loginMask').addEventListener('click', function(){ if(SIGNED_IN) hideLogin(); });
+
+  /* Signing out must really end the session: drop both credential channels, not just the
+   * in-memory token. sessionStorage covers this tab, the cookie is what the API falls back
+   * to, and it is now a session cookie so closing the browser ends it too. */
+  $('#logoutBtn').addEventListener('click', function(){
+    clearToken();
+    setLoggedIn(false);
+    showLogin();
+    $('#loginErr').textContent = '已退出登录';
+  });
+
+  /* ---------- 实时同步：菜单页下单后这里自动刷新 ---------- */
+  try{
+    var bus = new BroadcastChannel('chaxiaoyuan_orders');
+    bus.onmessage = function(){ refresh(); toast('收到新订单'); };
+  }catch(e){}
+  window.addEventListener('storage', function(e){
+    if(e.key === ORDERS_KEY){ refresh(); }
+  });
+  window.addEventListener('focus', function(){ refresh(); });
+  setInterval(function(){ if(API_MODE) refresh(); }, 10000);
+
+  refresh();
+})();
+</script>
+</body>
+</html>

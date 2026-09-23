@@ -1,0 +1,21 @@
+{
+  "name": "tea-courtyard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Tea Courtyard milk tea shop - static pages + zero-dependency Node API",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "check:syntax": "node tests/syntax-check.js",
+    "test": "node --test tests/api.test.js",
+    "test:e2e": "playwright test",
+    "test:live": "node tests/live-smoke.js",
+    "test:fresh": "node tests/audit-freshness.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0"
+  }
+}

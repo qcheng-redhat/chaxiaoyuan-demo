@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>茶小院 · 手作鲜奶茶</title>
+<style>
+  :root{
+    --bg:#faf7f2;
+    --card:#ffffff;
+    --ink:#2f2a25;
+    --muted:#837668;
+    --brand:#8b5e3c;
+    --brand-dark:#6b4526;
+    --accent:#d9b382;
+    --cream:#f2e8dc;
+    --line:#ece3d7;
+    --radius:18px;
+    --shadow:0 6px 24px rgba(107,69,38,.08);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,-apple-system,sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.75;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;text-decoration:none}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+
+  /* ---------- 顶部导航 ---------- */
+  header{
+    position:sticky;top:0;z-index:50;
+    background:rgba(250,247,242,.92);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  nav{display:flex;align-items:center;justify-content:space-between;height:68px}
+  .logo{display:flex;align-items:center;gap:10px;font-size:19px;font-weight:700;letter-spacing:.5px}
+  .logo .dot{
+    width:30px;height:30px;border-radius:50%;
+    background:linear-gradient(140deg,var(--accent),var(--brand));
+    display:grid;place-items:center;font-size:16px;
+  }
+  .navlinks{display:flex;gap:28px;font-size:15px;color:var(--muted);align-items:center}
+  .navlinks a{transition:color .2s}
+  .navlinks a:hover{color:var(--brand)}
+  .nav-cart{
+    display:inline-flex;align-items:center;gap:7px;
+    background:var(--brand);color:#fff;font-size:14px;font-weight:600;
+    padding:8px 16px;border-radius:999px;transition:background .2s,transform .18s;
+  }
+  .nav-cart:hover{background:var(--brand-dark);transform:translateY(-1px)}
+  .nav-cart b{
+    background:rgba(255,255,255,.25);border-radius:999px;
+    min-width:20px;padding:0 5px;font-size:12px;line-height:18px;text-align:center;
+  }
+
+  /* ---------- 首屏 ---------- */
+  .hero{padding:76px 0 84px;display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:center}
+  .tag{
+    display:inline-block;font-size:13px;letter-spacing:2px;color:var(--brand);
+    background:var(--cream);border-radius:999px;padding:5px 14px;margin-bottom:20px;
+  }
+  .hero h1{font-size:44px;line-height:1.25;font-weight:800;letter-spacing:-.5px}
+  .hero h1 em{font-style:normal;color:var(--brand)}
+  .hero p.sub{margin-top:18px;font-size:17px;color:var(--muted);max-width:26em}
+  .cta{display:flex;gap:14px;margin-top:32px;flex-wrap:wrap}
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:13px 28px;border-radius:999px;font-size:15px;font-weight:600;
+    transition:transform .18s, box-shadow .18s, background .18s;
+  }
+  .btn-main{background:var(--brand);color:#fff;box-shadow:0 6px 18px rgba(139,94,60,.28)}
+  .btn-main:hover{background:var(--brand-dark);transform:translateY(-2px)}
+  .btn-ghost{border:1.5px solid var(--line);color:var(--brand)}
+  .btn-ghost:hover{border-color:var(--accent);background:#fff;transform:translateY(-2px)}
+  .cup{
+    aspect-ratio:1/1;border-radius:50%;
+    background:radial-gradient(circle at 32% 28%,#fff 0%,var(--cream) 45%,#e7d6c1 100%);
+    display:grid;place-items:center;font-size:130px;
+    box-shadow:inset 0 -18px 40px rgba(139,94,60,.12), var(--shadow);
+  }
+
+  /* ---------- 通用区块 ---------- */
+  section{padding:74px 0}
+  section[id]{scroll-margin-top:80px}
+  .sec-head{text-align:center;margin-bottom:46px}
+  .sec-head h2{font-size:30px;font-weight:800;letter-spacing:-.3px}
+  .sec-head p{margin-top:10px;color:var(--muted);font-size:15px}
+  .sec-head .line{width:44px;height:3px;border-radius:3px;background:var(--accent);margin:16px auto 0}
+
+  /* ---------- 明星产品 ---------- */
+  .stars{display:grid;grid-template-columns:repeat(4,1fr);gap:22px}
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:26px 22px 24px;position:relative;
+    transition:transform .22s, box-shadow .22s, border-color .22s;
+    display:flex;flex-direction:column;
+  }
+  .card:hover{transform:translateY(-6px);box-shadow:var(--shadow);border-color:var(--cream)}
+  .card .icon{
+    width:64px;height:64px;border-radius:18px;
+    background:linear-gradient(150deg,#fff,var(--cream));
+    display:grid;place-items:center;font-size:32px;margin-bottom:16px;
+    border:1px solid var(--line);
+  }
+  .card h3{font-size:18px;font-weight:700}
+  .card .desc{margin-top:8px;font-size:14px;color:var(--muted);flex:1}
+  .card .foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:18px}
+  .price{font-size:20px;font-weight:800;color:var(--brand)}
+  .price small{font-size:13px;font-weight:500;color:var(--muted)}
+  .badge{
+    position:absolute;top:16px;right:16px;
+    font-size:12px;font-weight:700;letter-spacing:.5px;
+    color:#fff;background:var(--brand);border-radius:999px;padding:3px 11px;
+  }
+  .badge.new{background:#7a9a6b}
+  .badge.limit{background:#c98a4b}
+  .add-btn{
+    display:inline-flex;align-items:center;gap:4px;flex:none;
+    background:var(--cream);color:var(--brand-dark);font-size:14px;font-weight:700;
+    padding:8px 15px;border-radius:999px;transition:background .18s,color .18s,transform .18s;
+  }
+  .add-btn:hover{background:var(--brand);color:#fff;transform:translateY(-2px)}
+
+  /* ---------- 菜单 ---------- */
+  .menu-box{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:12px 30px;box-shadow:var(--shadow)}
+  .menu-row{display:flex;align-items:center;gap:14px;padding:14px 12px;margin:0 -12px;border-radius:12px;border-bottom:1px dashed var(--line);cursor:pointer;transition:background .18s}
+  .menu-row:hover{background:#fcf7f0}
+  .menu-row:last-child{border-bottom:none}
+  .menu-row .name{font-size:16px;font-weight:600;white-space:nowrap}
+  .menu-row .tip{font-size:13px;color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .menu-row .p{font-size:16px;font-weight:700;color:var(--brand)}
+  .add-mini{
+    flex:none;background:var(--cream);color:var(--brand-dark);
+    font-size:13.5px;font-weight:700;border-radius:999px;padding:7px 16px;white-space:nowrap;
+    transition:background .18s,color .18s;
+  }
+  .menu-row:hover .add-mini,.add-mini:hover{background:var(--brand);color:#fff}
+
+  /* ---------- 门店 ---------- */
+  .store{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+  .store-item{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:24px 26px;display:flex;gap:16px;align-items:flex-start}
+  .store-item .ic{font-size:24px;line-height:1.4}
+  .store-item h4{font-size:15px;font-weight:700;margin-bottom:4px}
+  .store-item p{font-size:14px;color:var(--muted)}
+
+  /* ---------- 页脚 ---------- */
+  footer{border-top:1px solid var(--line);padding:34px 0;text-align:center;color:var(--muted);font-size:13px}
+  footer strong{color:var(--brand)}
+
+  /* ================= 点单系统 ================= */
+  /* 悬浮购物车 */
+  #fab{
+    position:fixed;right:26px;bottom:26px;z-index:60;
+    display:flex;align-items:center;gap:10px;
+    background:var(--brand);color:#fff;font-size:15px;font-weight:600;
+    padding:14px 22px;border-radius:999px;
+    box-shadow:0 10px 28px rgba(107,69,38,.32);
+    transition:transform .18s,background .18s;
+  }
+  #fab:hover{background:var(--brand-dark);transform:translateY(-3px)}
+  #fab .n{
+    background:#fff;color:var(--brand);font-size:12px;font-weight:800;
+    min-width:21px;height:21px;border-radius:999px;display:grid;place-items:center;padding:0 5px;
+  }
+  #fab .n[data-empty="1"]{display:none}
+
+  /* 遮罩 */
+  .mask{
+    position:fixed;inset:0;background:rgba(47,42,37,.42);z-index:80;
+    opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s;
+  }
+  .mask.on{opacity:1;visibility:visible}
+
+  /* 购物车抽屉 */
+  #drawer{
+    position:fixed;top:0;right:0;bottom:0;width:400px;max-width:92vw;z-index:90;
+    background:var(--bg);display:flex;flex-direction:column;
+    transform:translateX(102%);transition:transform .3s cubic-bezier(.4,0,.2,1);
+    box-shadow:-14px 0 40px rgba(47,42,37,.16);
+  }
+  #drawer.on{transform:none}
+  .d-head{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:20px 22px;border-bottom:1px solid var(--line);flex:none;
+  }
+  .d-head h3{font-size:17px;font-weight:800}
+  .d-head .x{font-size:20px;color:var(--muted);line-height:1;padding:4px 8px;border-radius:8px}
+  .d-head .x:hover{background:var(--cream);color:var(--ink)}
+  .d-body{flex:1;overflow-y:auto;padding:8px 22px}
+  .d-empty{text-align:center;color:var(--muted);font-size:14px;padding:70px 0}
+  .d-empty .e{font-size:44px;display:block;margin-bottom:12px;opacity:.6}
+  .go-order{
+    display:inline-block;margin-top:18px;
+    background:var(--brand);color:#fff;font-size:14px;font-weight:700;
+    padding:11px 26px;border-radius:999px;transition:background .18s,transform .18s;
+  }
+  .go-order:hover{background:var(--brand-dark);transform:translateY(-2px)}
+
+  .ci{display:flex;gap:14px;padding:16px 0;border-bottom:1px dashed var(--line)}
+  .ci .em{
+    width:46px;height:46px;flex:none;border-radius:14px;
+    background:var(--cream);display:grid;place-items:center;font-size:24px;
+  }
+  .ci .info{flex:1;min-width:0}
+  .ci .nm{font-size:15px;font-weight:700}
+  .ci .sp{font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.6}
+  .ci .ln{display:flex;align-items:center;justify-content:space-between;margin-top:9px}
+  .ci .up{font-size:15px;font-weight:800;color:var(--brand)}
+  .qty{display:flex;align-items:center;gap:2px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:2px}
+  .qty button{width:26px;height:26px;border-radius:50%;font-size:15px;font-weight:700;color:var(--brand);display:grid;place-items:center}
+  .qty button:hover{background:var(--cream)}
+  .qty span{min-width:26px;text-align:center;font-size:14px;font-weight:700}
+  .del{font-size:12px;color:var(--muted);margin-left:10px}
+  .del:hover{color:#c0563c}
+
+  .d-foot{flex:none;border-top:1px solid var(--line);padding:18px 22px 22px;background:#fff}
+  .opt-row{display:flex;gap:8px;margin-bottom:12px}
+  .opt{
+    flex:1;text-align:center;font-size:13.5px;font-weight:600;color:var(--muted);
+    border:1.5px solid var(--line);border-radius:12px;padding:9px 0;transition:.18s;
+  }
+  .opt.on{border-color:var(--brand);color:var(--brand);background:var(--cream)}
+  .d-foot input,.d-foot textarea{
+    width:100%;font-family:inherit;font-size:14px;color:var(--ink);
+    background:var(--bg);border:1.5px solid var(--line);border-radius:12px;
+    padding:10px 14px;margin-bottom:10px;resize:none;outline:none;transition:border-color .18s;
+  }
+  .d-foot input:focus,.d-foot textarea:focus{border-color:var(--accent)}
+  .total{display:flex;align-items:baseline;justify-content:space-between;margin:6px 0 14px}
+  .total .lb{font-size:14px;color:var(--muted)}
+  .total .vv{font-size:24px;font-weight:800;color:var(--brand)}
+  .submit{
+    width:100%;background:var(--brand);color:#fff;font-size:16px;font-weight:700;
+    padding:14px;border-radius:14px;transition:background .18s;
+  }
+  .submit:hover{background:var(--brand-dark)}
+
+  /* 规格弹窗 */
+  #sheet{
+    position:fixed;left:50%;bottom:0;transform:translate(-50%,110%);
+    width:520px;max-width:94vw;max-height:88vh;overflow-y:auto;z-index:95;
+    background:var(--bg);border-radius:22px 22px 0 0;padding:26px 26px 24px;
+    transition:transform .3s cubic-bezier(.4,0,.2,1);
+    box-shadow:0 -12px 40px rgba(47,42,37,.2);
+  }
+  #sheet.on{transform:translate(-50%,0)}
+  .s-top{display:flex;gap:14px;align-items:center;margin-bottom:22px}
+  .s-top .em{width:56px;height:56px;flex:none;border-radius:16px;background:var(--cream);display:grid;place-items:center;font-size:30px}
+  .s-top h3{font-size:19px;font-weight:800}
+  .s-top .pr{font-size:15px;font-weight:700;color:var(--brand);margin-top:2px}
+  .fld{margin-bottom:18px}
+  .fld>label{display:block;font-size:13.5px;font-weight:700;margin-bottom:9px;color:var(--muted);letter-spacing:.5px}
+  .chips{display:flex;flex-wrap:wrap;gap:9px}
+  .chip{
+    font-size:13.5px;font-weight:600;color:var(--ink);
+    background:#fff;border:1.5px solid var(--line);border-radius:999px;
+    padding:7px 16px;transition:.16s;
+  }
+  .chip:hover{border-color:var(--accent)}
+  .chip.on{background:var(--brand);border-color:var(--brand);color:#fff}
+  .s-foot{display:flex;gap:12px;align-items:center;margin-top:22px}
+  .s-foot .sum{flex:1;font-size:14px;color:var(--muted)}
+  .s-foot .sum b{font-size:22px;color:var(--brand);font-weight:800}
+  .s-foot .ok{background:var(--brand);color:#fff;font-size:15px;font-weight:700;padding:13px 34px;border-radius:999px;transition:background .18s}
+  .s-foot .ok:hover{background:var(--brand-dark)}
+
+  /* 下单成功 */
+  #done{
+    position:fixed;left:50%;top:50%;transform:translate(-50%,-46%) scale(.94);
+    width:430px;max-width:92vw;z-index:100;background:#fff;border-radius:22px;
+    padding:30px 28px;text-align:center;opacity:0;visibility:hidden;
+    transition:opacity .25s,transform .25s,visibility .25s;
+    box-shadow:0 20px 60px rgba(47,42,37,.24);
+    /* short screens (landscape phones, in-app browsers): let the order summary shrink
+       instead of pushing the buttons below the fold, where the backdrop blocks them */
+    display:flex;flex-direction:column;max-height:92vh;overflow:auto;
+  }
+  #done.on{opacity:1;visibility:visible;transform:translate(-50%,-50%) scale(1)}
+  #done .ok-ic{
+    flex:0 0 auto;
+    width:62px;height:62px;border-radius:50%;background:#eaf3e6;color:#5c8a4a;
+    font-size:32px;display:grid;place-items:center;margin:0 auto 16px;
+  }
+  #done h3{flex:0 0 auto;font-size:20px;font-weight:800}
+  #done .no{flex:0 0 auto;font-size:13px;color:var(--muted);margin-top:6px}
+  #done pre{
+    text-align:left;font-family:inherit;font-size:13.5px;line-height:1.9;
+    background:var(--bg);border:1px solid var(--line);border-radius:14px;
+    padding:16px;margin:18px 0;max-height:230px;overflow:auto;white-space:pre-wrap;
+    flex:0 1 auto;min-height:0;
+  }
+  #done .acts{flex:0 0 auto;display:flex;gap:12px}
+  #done .acts button{flex:1;padding:13px;border-radius:12px;font-size:15px;font-weight:700}
+  #done .done{background:var(--brand);color:#fff}
+  #done .done:hover{background:var(--brand-dark)}
+  #done .copy{background:var(--cream);color:var(--brand-dark)}
+  #done .copy:hover{background:#e8dbca}
+
+  /* 提示条 */
+  #toast{
+    position:fixed;left:50%;top:88px;transform:translate(-50%,-14px);
+    background:var(--ink);color:#fff;font-size:14px;font-weight:600;
+    padding:11px 22px;border-radius:999px;z-index:120;
+    opacity:0;visibility:hidden;transition:.25s;pointer-events:none;
+  }
+  #toast.on{opacity:1;visibility:visible;transform:translate(-50%,0)}
+
+  @media(max-width:900px){
+    .stars{grid-template-columns:repeat(2,1fr)}
+    .hero{grid-template-columns:1fr;padding:52px 0 60px;text-align:center}
+    .hero p.sub{margin-left:auto;margin-right:auto}
+    .cta{justify-content:center}
+    .cup{max-width:260px;margin:0 auto;font-size:96px}
+    .store{grid-template-columns:1fr}
+    .navlinks a{display:none}
+  }
+  @media(max-width:560px){
+    .stars{grid-template-columns:1fr}
+    .hero h1{font-size:32px}
+    .menu-box{padding:8px 18px}
+    .menu-row .tip{display:none}
+    /* the nowrap name must never widen the layout viewport: an overflowing row knocks
+       every fixed overlay (cart drawer, spec sheet) out of position on phones */
+    .menu-row .name{white-space:normal;flex:1;min-width:0;line-height:1.4}
+    #fab{right:16px;bottom:16px;padding:13px 18px;font-size:14px}
+    #sheet{padding:22px 20px 20px;border-radius:18px 18px 0 0}
+  }
+</style>
+
+<script>
+/* Stale-cache self-heal. The publishing gateway caches responses per URL and has
+   served an out-of-date copy of a page after a deploy (old JS, which broke the
+   order dashboard). Every page now carries its build id; if the server reports a
+   different one, we reload once with ?v=<id> — a fresh cache key, so the gateway
+   goes back to the server for the current file. */
+window.__CX_BUILD__ = '__BUILD__';
+(function () {
+  try {
+    fetch('/api/version', { cache: 'no-store' })
+      .then(function (r) { return r.json(); })
+      .then(function (v) {
+        if (!v || !v.build || v.build === window.__CX_BUILD__) return;
+        var key = 'cx_reload_' + v.build;
+        try {
+          if (sessionStorage.getItem(key)) return;
+          sessionStorage.setItem(key, '1');
+        } catch (e) {}
+        var u = new URL(location.href);
+        u.searchParams.set('v', v.build);
+        location.replace(u.toString());
+      })
+      .catch(function () {});
+  } catch (e) {}
+})();
+</script>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <nav>
+      <div class="logo"><span class="dot">🧋</span>茶小院</div>
+      <div class="navlinks">
+        <a href="#stars">明星产品</a>
+        <a href="#menu">全部菜单</a>
+        <a href="#store">门店信息</a>
+        <a href="index-en.html?v=__BUILD__" style="font-weight:600">EN</a>
+        <button class="nav-cart" id="navCart">🛒 购物车 <b id="navCount">0</b></button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="hero">
+    <div>
+      <span class="tag">新店开业 · 手作鲜奶茶</span>
+      <h1>一杯<em>真材实料</em><br>的慢煮奶茶</h1>
+      <p class="sub">茶叶每日现萃，珍珠每 4 小时现煮一次，鲜奶当日冷链到店。少一点添加剂，多一点原本的味道。</p>
+      <div class="cta">
+        <button class="btn btn-main" id="heroOrder">立即点单 →</button>
+        <a class="btn btn-ghost" href="#store">门店信息</a>
+      </div>
+    </div>
+    <div class="cup">🧋</div>
+  </div>
+</div>
+
+<section id="stars">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>明星产品</h2>
+      <p>点「加入」可选甜度冰量，也能加小料</p>
+      <div class="line"></div>
+    </div>
+
+    <div class="stars">
+      <div class="card">
+        <span class="badge">招牌 No.1</span>
+        <div class="icon">🧋</div>
+        <h3>黑糖珍珠鲜奶</h3>
+        <p class="desc">手炒黑糖慢熬两小时，现煮珍珠 Q 弹挂壁，配 100% 生牛乳。</p>
+        <div class="foot">
+          <span class="price">¥16 <small>/杯</small></span>
+          <button class="add-btn" data-id="p1">＋ 加入</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <span class="badge limit">人气王</span>
+        <div class="icon">🍵</div>
+        <h3>茉莉奶绿</h3>
+        <p class="desc">茉莉香片冷萃，茶香清扬不涩口，尾调回甘，夏天最耐喝的一杯。</p>
+        <div class="foot">
+          <span class="price">¥14 <small>/杯</small></span>
+          <button class="add-btn" data-id="p2">＋ 加入</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <span class="badge new">新品</span>
+        <div class="icon">🍠</div>
+        <h3>芋泥波波奶茶</h3>
+        <p class="desc">槟榔芋现蒸手捣，绵密带颗粒感，底下藏一层波波和芋圆。</p>
+        <div class="foot">
+          <span class="price">¥18 <small>/杯</small></span>
+          <button class="add-btn" data-id="p3">＋ 加入</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <span class="badge limit">季节限定</span>
+        <div class="icon">🥭</div>
+        <h3>杨枝甘露</h3>
+        <p class="desc">芒果果肉打底，现剥西柚粒，椰浆清甜，喝得到整块果肉。</p>
+        <div class="foot">
+          <span class="price">¥19 <small>/杯</small></span>
+          <button class="add-btn" data-id="p4">＋ 加入</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="menu" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>全部菜单</h2>
+      <p>点任意一款都能自选甜度 / 冰量 / 小料</p>
+      <div class="line"></div>
+    </div>
+
+    <div class="menu-box">
+      <div class="menu-row" data-id="p1">
+        <span class="name">黑糖珍珠鲜奶</span>
+        <span class="tip">手炒黑糖 · 现煮珍珠 · 生牛乳</span>
+        <span class="p">¥16</span>
+        <button class="add-mini" aria-label="选择规格并加入黑糖珍珠鲜奶">＋ 加入</button>
+      </div>
+      <div class="menu-row" data-id="p2">
+        <span class="name">茉莉奶绿</span>
+        <span class="tip">茉莉香片 · 清爽回甘</span>
+        <span class="p">¥14</span>
+        <button class="add-mini" aria-label="选择规格并加入茉莉奶绿">＋ 加入</button>
+      </div>
+      <div class="menu-row" data-id="p3">
+        <span class="name">芋泥波波奶茶</span>
+        <span class="tip">现蒸芋泥 · 波波 · 芋圆</span>
+        <span class="p">¥18</span>
+        <button class="add-mini" aria-label="选择规格并加入芋泥波波奶茶">＋ 加入</button>
+      </div>
+      <div class="menu-row" data-id="p4">
+        <span class="name">杨枝甘露</span>
+        <span class="tip">芒果 · 西柚 · 椰浆</span>
+        <span class="p">¥19</span>
+        <button class="add-mini" aria-label="选择规格并加入杨枝甘露">＋ 加入</button>
+      </div>
+      <div class="menu-row" data-id="m5">
+        <span class="name">古法烤奶茶</span>
+        <span class="tip">炭焙乌龙 · 焦香浓郁</span>
+        <span class="p">¥15</span>
+        <button class="add-mini" aria-label="选择规格并加入古法烤奶茶">＋ 加入</button>
+      </div>
+      <div class="menu-row" data-id="m6">
+        <span class="name">四季春柠檬茶</span>
+        <span class="tip">手捶柠檬 · 茶感干净</span>
+        <span class="p">¥15</span>
+        <button class="add-mini" aria-label="选择规格并加入四季春柠檬茶">＋ 加入</button>
+      </div>
+      <div class="menu-row" data-id="m7">
+        <span class="name">纯茶（茉莉 / 乌龙 / 四季春）</span>
+        <span class="tip">无糖零卡 · 解腻首选</span>
+        <span class="p">¥10</span>
+        <button class="add-mini" aria-label="选择规格并加入纯茶">＋ 加入</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="store" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>门店信息</h2>
+      <p>开业首周，到店消费送小料一份</p>
+      <div class="line"></div>
+    </div>
+
+    <div class="store">
+      <div class="store-item">
+        <span class="ic">📍</span>
+        <div>
+          <h4>门店地址</h4>
+          <p>XX 市 XX 区 XX 路 88 号<br>（XX 广场 1F 中庭，地铁 2 号线 XX 站 B 口）</p>
+        </div>
+      </div>
+      <div class="store-item">
+        <span class="ic">🕐</span>
+        <div>
+          <h4>营业时间</h4>
+          <p>每日 10:00 — 22:00<br>节假日正常营业</p>
+        </div>
+      </div>
+      <div class="store-item">
+        <span class="ic">📞</span>
+        <div>
+          <h4>联系电话</h4>
+          <p>138-0000-0000<br>团单 / 企业下午茶可提前预订</p>
+        </div>
+      </div>
+      <div class="store-item">
+        <span class="ic">🛵</span>
+        <div>
+          <h4>外卖配送</h4>
+          <p>美团 / 饿了么已上线<br>3 公里内约 30 分钟送达</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <strong>茶小院</strong> · 手作鲜奶茶　|　用心煮好每一杯<br>
+    © 2026 茶小院 保留所有权利
+    <div style="margin-top:12px">
+      <a href="store?v=__BUILD__" style="color:var(--brand);font-weight:600;border-bottom:1px solid var(--accent)">
+        店家入口 · 订单汇总 →
+      </a>
+    </div>
+  </div>
+</footer>
+
+<!-- ============ 点单相关 UI ============ -->
+<button id="fab">🛒 购物车 <span class="n" id="fabCount" data-empty="1">0</span></button>
+
+<div class="mask" id="mask"></div>
+
+<aside id="drawer" aria-label="购物车">
+  <div class="d-head">
+    <h3>我的订单</h3>
+    <button class="x" id="drawerClose" aria-label="关闭">✕</button>
+  </div>
+  <div class="d-body" id="cartBody"></div>
+  <div class="d-foot">
+    <div class="opt-row" id="pickRow">
+      <button class="opt on" data-pick="到店自取">到店自取</button>
+      <button class="opt" data-pick="需要外送">需要外送</button>
+    </div>
+    <input id="phone" type="tel" placeholder="手机号（取餐叫号用，选填）">
+    <textarea id="note" rows="2" placeholder="备注：比如少冰、打包分开装…"></textarea>
+    <div class="total">
+      <span class="lb">合计（<span id="totalQty">0</span> 件）</span>
+      <span class="vv" id="totalPrice">¥0</span>
+    </div>
+    <button class="submit" id="submitBtn">提交订单</button>
+  </div>
+</aside>
+
+<div id="sheet" aria-label="选择规格">
+  <div class="s-top">
+    <div class="em" id="sEmoji">🧋</div>
+    <div>
+      <h3 id="sName">—</h3>
+      <div class="pr" id="sBase">¥0</div>
+    </div>
+  </div>
+
+  <div class="fld">
+    <label>冰量 / 温度</label>
+    <div class="chips" id="sIce"></div>
+  </div>
+
+  <div class="fld">
+    <label>甜度</label>
+    <div class="chips" id="sSugar"></div>
+  </div>
+
+  <div class="fld">
+    <label>加小料（可多选，每份 +¥3）</label>
+    <div class="chips" id="sAddon"></div>
+  </div>
+
+  <div class="s-foot">
+    <div class="sum">小计 <b id="sSum">¥0</b></div>
+    <button class="ok" id="sOk">加入订单</button>
+  </div>
+</div>
+
+<div id="done" role="dialog" aria-label="下单成功">
+  <div class="ok-ic">✓</div>
+  <h3>下单成功</h3>
+  <div class="no" id="doneNo"></div>
+  <div class="no" id="doneSync"></div>
+  <pre id="doneText"></pre>
+  <div class="acts">
+    <button class="copy" id="copyBtn">复制订单信息</button>
+    <button class="done" id="doneBtn">完成</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ---------- 数据 ---------- */
+  var PRODUCTS = {
+    p1:{name:'黑糖珍珠鲜奶', price:16, emoji:'🧋'},
+    p2:{name:'茉莉奶绿',     price:14, emoji:'🍵'},
+    p3:{name:'芋泥波波奶茶', price:18, emoji:'🍠'},
+    p4:{name:'杨枝甘露',     price:19, emoji:'🥭'},
+    m5:{name:'古法烤奶茶',   price:15, emoji:'🔥'},
+    m6:{name:'四季春柠檬茶', price:15, emoji:'🍋'},
+    m7:{name:'纯茶',         price:10, emoji:'🍃', def:{ice:'去冰', sugar:'无糖'}},
+    m8:{name:'加料',         price:3,  emoji:'⚪'}
+  };
+  var ICE   = ['正常冰','少冰','去冰','常温','热饮'];
+  var SUGAR = ['全糖','七分糖','半糖','三分糖','无糖'];
+  var ADDON = ['珍珠','芋圆','椰果','布丁','奶盖'];
+  var ADDON_PRICE = 3;
+  var KEY = 'chaxiaoyuan_cart_v1';
+
+  /* ---------- 订单汇总（线上菜单 + 表单汇总模式） ---------- */
+  var ORDERS_KEY = 'chaxiaoyuan_orders_v1';
+
+  // 接入云端表单：把金数据 / 腾讯问卷 / 飞书表单的提交地址填在这里，
+  // 订单会同时汇总到云端；留空则只汇总在本机（当前演示模式）。
+  var ORDER_ENDPOINT = '';
+
+  var bus = null;
+  try{ bus = new BroadcastChannel('chaxiaoyuan_orders'); }catch(e){ bus = null; }
+
+  function readOrders(){
+    try{
+      var a = JSON.parse(localStorage.getItem(ORDERS_KEY) || '[]');
+      return Array.isArray(a) ? a : [];
+    }catch(e){ return []; }
+  }
+
+  function saveOrder(o){
+    var list = readOrders();
+    list.unshift(o);
+    try{ localStorage.setItem(ORDERS_KEY, JSON.stringify(list)); }catch(e){}
+    if(bus){ try{ bus.postMessage({type:'new', no:o.no}); }catch(e){} }
+    if(ORDER_ENDPOINT){
+      try{
+        fetch(ORDER_ENDPOINT, {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify(o)
+        }).catch(function(){});
+      }catch(e){}
+    }
+  }
+
+  /* ---------- 状态 ---------- */
+  var cart = [];
+  try{ cart = JSON.parse(localStorage.getItem(KEY) || '[]') || []; }catch(e){ cart = []; }
+  if(!Array.isArray(cart)) cart = [];
+
+  var pick = '到店自取';
+  var cur  = null;                                   // 当前正在选规格的商品
+  var curSpec = {ice:ICE[1], sugar:SUGAR[2], addons:[], noSpec:false};
+
+  var $  = function(s){ return document.querySelector(s); };
+  var $$ = function(s){ return Array.prototype.slice.call(document.querySelectorAll(s)); };
+
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(cart)); }catch(e){} }
+  function money(n){ return '¥' + (Math.round(n * 100) / 100); }
+
+  /* ---------- 提示 ---------- */
+  var toastTimer = null;
+  function toast(msg){
+    var t = $('#toast');
+    t.textContent = msg;
+    t.classList.add('on');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ t.classList.remove('on'); }, 1800);
+  }
+
+  /* ---------- 规格选择弹窗 ---------- */
+  function renderChips(){
+    $('#sIce').innerHTML = ICE.map(function(v){
+      return '<button class="chip' + (v === curSpec.ice ? ' on' : '') + '" data-k="ice" data-v="' + v + '">' + v + '</button>';
+    }).join('');
+    $('#sSugar').innerHTML = SUGAR.map(function(v){
+      return '<button class="chip' + (v === curSpec.sugar ? ' on' : '') + '" data-k="sugar" data-v="' + v + '">' + v + '</button>';
+    }).join('');
+    $('#sAddon').innerHTML = ADDON.map(function(v){
+      return '<button class="chip' + (curSpec.addons.indexOf(v) > -1 ? ' on' : '') + '" data-k="addon" data-v="' + v + '">' + v + ' +¥' + ADDON_PRICE + '</button>';
+    }).join('');
+  }
+
+  function unitPrice(p, addonCount){ return p.price + addonCount * ADDON_PRICE; }
+
+  function refreshSheetSum(){
+    if(!cur) return;
+    var p = PRODUCTS[cur];
+    var sum = curSpec.noSpec ? p.price : unitPrice(p, curSpec.addons.length);
+    $('#sSum').textContent = money(sum);
+  }
+
+  function openSheet(id){
+    var p = PRODUCTS[id];
+    if(!p){ return; }
+    cur = id;
+    var d = p.def || {};
+    curSpec = {
+      ice:   d.ice   && ICE.indexOf(d.ice)   > -1 ? d.ice   : ICE[1],
+      sugar: d.sugar && SUGAR.indexOf(d.sugar) > -1 ? d.sugar : SUGAR[2],
+      addons: [], noSpec: false
+    };
+    $('#sEmoji').textContent = p.emoji;
+    $('#sName').textContent = p.name;
+    $('#sBase').textContent = money(p.price) + ' / 份';
+    renderChips();
+    refreshSheetSum();
+    $('#mask').classList.add('on');
+    $('#sheet').classList.add('on');
+  }
+
+  function closeSheet(){
+    $('#sheet').classList.remove('on');
+    if(!$('#drawer').classList.contains('on')) $('#mask').classList.remove('on');
+    curSpec.noSpec = false;
+  }
+
+  /* ---------- 购物车 ---------- */
+  function specText(it){
+    if(it.noSpec) return '';
+    var parts = [it.ice, it.sugar];
+    if(it.addons && it.addons.length) parts.push('加' + it.addons.join('、'));
+    return parts.join(' · ');
+  }
+
+  function specKey(id, spec){
+    if(spec.noSpec) return id + '|plain';
+    return id + '|' + spec.ice + '|' + spec.sugar + '|' + spec.addons.slice().sort().join(',');
+  }
+
+  function addToCart(id, spec){
+    var p = PRODUCTS[id];
+    if(!p) return;
+    var s = spec || {ice:ICE[1], sugar:SUGAR[2], addons:[], noSpec:true};
+    var k = specKey(id, s);
+    var found = null;
+    for(var i = 0; i < cart.length; i++){ if(cart[i].key === k){ found = cart[i]; break; } }
+    if(found){ found.qty += 1; }
+    else{
+      cart.push({
+        key:k, id:id, name:p.name, emoji:p.emoji,
+        unit: s.noSpec ? p.price : unitPrice(p, s.addons.length),
+        qty:1, ice:s.ice, sugar:s.sugar, addons:s.addons.slice(), noSpec:!!s.noSpec
+      });
+    }
+    save(); renderCart();
+    toast('已加入：' + p.name);
+  }
+
+  function changeQty(k, d){
+    for(var i = 0; i < cart.length; i++){
+      if(cart[i].key === k){
+        cart[i].qty += d;
+        if(cart[i].qty <= 0) cart.splice(i, 1);
+        break;
+      }
+    }
+    save(); renderCart();
+  }
+
+  function totalQty(){ return cart.reduce(function(a, it){ return a + it.qty; }, 0); }
+  function totalPrice(){ return cart.reduce(function(a, it){ return a + it.qty * it.unit; }, 0); }
+
+  function renderCart(){
+    var n = totalQty();
+
+    $('#navCount').textContent = n;
+    $('#fabCount').textContent = n;
+    $('#fabCount').setAttribute('data-empty', n === 0 ? '1' : '0');
+
+    var body = $('#cartBody');
+    if(!cart.length){
+      body.innerHTML = '<div class="d-empty"><span class="e">🧋</span>还没有选饮品<br>' +
+        '<button class="go-order" data-act="go">去选饮品 →</button></div>';
+    }else{
+      body.innerHTML = cart.map(function(it){
+        var st = specText(it);
+        return '<div class="ci">' +
+          '<div class="em">' + it.emoji + '</div>' +
+          '<div class="info">' +
+            '<div class="nm">' + it.name + '</div>' +
+            (st ? '<div class="sp">' + st + '</div>' : '') +
+            '<div class="ln">' +
+              '<span class="up">' + money(it.unit * it.qty) + '</span>' +
+              '<span style="display:flex;align-items:center">' +
+                '<span class="qty">' +
+                  '<button data-act="minus" data-k="' + it.key + '">−</button>' +
+                  '<span>' + it.qty + '</span>' +
+                  '<button data-act="plus" data-k="' + it.key + '">＋</button>' +
+                '</span>' +
+                '<button class="del" data-act="del" data-k="' + it.key + '">删除</button>' +
+              '</span>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    $('#totalQty').textContent = n;
+    $('#totalPrice').textContent = money(totalPrice());
+
+    var foot = document.querySelector('.d-foot');
+    if(foot) foot.style.display = n ? '' : 'none';
+  }
+
+  /* ---------- 抽屉 ---------- */
+  function openDrawer(){
+    renderCart();
+    $('#drawer').classList.add('on');
+    $('#mask').classList.add('on');
+  }
+  function closeDrawer(){
+    $('#drawer').classList.remove('on');
+    if(!$('#sheet').classList.contains('on')) $('#mask').classList.remove('on');
+  }
+
+  /* ---------- 跳转到选品区（立即点单的落点） ---------- */
+  function goOrder(){
+    closeDrawer();
+    var s = document.getElementById('stars');
+    if(s){
+      try{ s.scrollIntoView({behavior:'smooth', block:'start'}); }
+      catch(e){ s.scrollIntoView(); }
+    }
+    setTimeout(function(){ toast('点「＋ 加入」，可选甜度冰量和小料'); }, 450);
+  }
+
+  /* ---------- 提交订单 ---------- */
+  function pad(x){ return String(x).length < 2 ? '0' + x : String(x); }
+
+  function buildOrder(){
+    var d = new Date();
+    var no = 'CY' + String(d.getFullYear()).slice(2) + pad(d.getMonth() + 1) + pad(d.getDate()) +
+             pad(d.getHours()) + pad(d.getMinutes()) + '-' + Math.floor(1000 + Math.random() * 9000);
+
+    return {
+      no: no,
+      ts: d.getTime(),
+      time: d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' +
+            pad(d.getHours()) + ':' + pad(d.getMinutes()),
+      pick: pick,
+      phone: $('#phone').value.trim(),
+      note: $('#note').value.trim(),
+      items: cart.map(function(it){
+        return {id:it.id, name:it.name, qty:it.qty, unit:it.unit, spec:specText(it), addons:it.addons.slice()};
+      }),
+      qty: totalQty(),
+      total: totalPrice(),
+      status: 'new'
+    };
+  }
+
+  function orderToText(o){
+    var lines = ['【茶小院 · ' + o.pick + '】', '订单号：' + o.no, '———————————'];
+    o.items.forEach(function(it){
+      lines.push(it.name + ' ×' + it.qty + '　' + money(it.unit * it.qty));
+      if(it.spec) lines.push('　　' + it.spec);
+    });
+    lines.push('———————————');
+    lines.push('合计：' + money(o.total) + '（' + o.qty + ' 件）');
+    if(o.phone) lines.push('手机号：' + o.phone);
+    if(o.note) lines.push('备注：' + o.note);
+    lines.push('下单时间：' + o.time);
+    return lines.join('\n');
+  }
+
+  function canUseApi(){
+    return location.protocol === 'http:' || location.protocol === 'https:';
+  }
+
+  function showDone(order, cloud){
+    var text = orderToText(order);
+    $('#doneNo').textContent = '订单号 ' + order.no;
+    $('#doneSync').textContent = cloud
+      ? '订单已直达店家后台，店家马上就能看到'
+      : '已记入本机订单汇总（未连上服务器，可复制发给店家）';
+    $('#doneText').textContent = text;
+    $('#done').dataset.text = text;
+    $('#done').classList.add('on');
+    $('#mask').classList.add('on');
+  }
+
+  var submitting = false;
+  $('#submitBtn').addEventListener('click', function(){
+    if(submitting) return;                       /* double-click guard */
+    if(!cart.length){ toast('购物车还是空的，先加一杯吧'); return; }
+    var ph = $('#phone').value.trim();
+    if(pick === '需要外送' && !ph){ toast('外送请填一下手机号'); return; }
+
+    submitting = true;
+    $('#submitBtn').disabled = true;
+    var order = buildOrder();
+    var finish = function(cloud){
+      if(!cloud) saveOrder(order);
+      showDone(order, cloud);
+      cart = []; save(); renderCart();
+      $('#phone').value = ''; $('#note').value = '';
+      submitting = false;
+      $('#submitBtn').disabled = false;
+    };
+
+    if(canUseApi()){
+      fetch('/api/orders', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(order)
+      }).then(function(r){ return r.ok; })
+        .then(function(ok){ finish(ok); })
+        .catch(function(){ finish(false); });
+    }else{
+      finish(false);
+    }
+  });
+
+  $('#copyBtn').addEventListener('click', function(){
+    var text = $('#done').dataset.text || '';
+    function fallback(){
+      var ta = document.createElement('textarea');
+      ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try{ document.execCommand('copy'); toast('订单已复制，可发给店家微信'); }
+      catch(e){ toast('复制失败，请长按上方订单手动复制'); }
+      document.body.removeChild(ta);
+    }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(function(){ toast('订单已复制，可发给店家微信'); }, fallback);
+    }else{ fallback(); }
+  });
+
+  /* 完成 closes everything the success flow opened: the dialog AND the cart drawer
+     behind it, so the customer lands back on a clean menu page. */
+  $('#doneBtn').addEventListener('click', function(){
+    $('#done').classList.remove('on');
+    closeDrawer();
+  });
+
+  /* ---------- 事件绑定 ---------- */
+  $$('.add-btn').forEach(function(b){
+    b.addEventListener('click', function(){ openSheet(b.getAttribute('data-id')); });
+  });
+  $$('.menu-row').forEach(function(r){
+    r.addEventListener('click', function(){ openSheet(r.getAttribute('data-id')); });
+    r.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openSheet(r.getAttribute('data-id')); }
+    });
+  });
+
+  $('#sIce').addEventListener('click', function(e){
+    var t = e.target.closest('.chip'); if(!t) return;
+    curSpec.ice = t.getAttribute('data-v'); renderChips(); refreshSheetSum();
+  });
+  $('#sSugar').addEventListener('click', function(e){
+    var t = e.target.closest('.chip'); if(!t) return;
+    curSpec.sugar = t.getAttribute('data-v'); renderChips(); refreshSheetSum();
+  });
+  $('#sAddon').addEventListener('click', function(e){
+    var t = e.target.closest('.chip'); if(!t) return;
+    var v = t.getAttribute('data-v');
+    var i = curSpec.addons.indexOf(v);
+    if(i > -1) curSpec.addons.splice(i, 1); else curSpec.addons.push(v);
+    renderChips(); refreshSheetSum();
+  });
+
+  $('#sOk').addEventListener('click', function(){
+    if(!cur) return;
+    addToCart(cur, curSpec);
+    closeSheet();
+    setTimeout(openDrawer, 180);
+  });
+
+  $('#cartBody').addEventListener('click', function(e){
+    var t = e.target.closest('[data-act]'); if(!t) return;
+    var act = t.getAttribute('data-act');
+    var k = t.getAttribute('data-k');
+    if(act === 'plus')  changeQty(k, 1);
+    if(act === 'minus') changeQty(k, -1);
+    if(act === 'del'){
+      cart = cart.filter(function(it){ return it.key !== k; });
+      save(); renderCart(); toast('已移除');
+    }
+    if(act === 'go'){ goOrder(); }
+  });
+
+  $('#pickRow').addEventListener('click', function(e){
+    var t = e.target.closest('.opt'); if(!t) return;
+    pick = t.getAttribute('data-pick');
+    $$('#pickRow .opt').forEach(function(o){ o.classList.remove('on'); });
+    t.classList.add('on');
+  });
+
+  $('#fab').addEventListener('click', openDrawer);
+  $('#navCart').addEventListener('click', openDrawer);
+  $('#heroOrder').addEventListener('click', goOrder);
+  $('#drawerClose').addEventListener('click', closeDrawer);
+  $('#mask').addEventListener('click', function(){
+    closeDrawer();
+    closeSheet();
+    $('#done').classList.remove('on');
+    $('#mask').classList.remove('on');
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape'){
+      closeDrawer(); closeSheet();
+      $('#done').classList.remove('on');
+      $('#mask').classList.remove('on');
+    }
+  });
+
+  renderCart();
+})();
+</script>
+</body>
+</html>

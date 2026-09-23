@@ -1,0 +1,79 @@
+name: CI
+
+# Runs on every push to main and on every pull request. The published site is
+# NOT deployed from here - publishing goes through the WorkBuddy publishing
+# tool, which GitHub cannot reach (no API, no credentials). This workflow only
+# proves the code is sound before/after that manual publish.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Phase 0 - fast static checks. Runs first so a syntax error is reported in
+  # seconds instead of after a browser download, and blocks the test job.
+  static-checks:
+    name: Phase 0 - static checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Syntax check (js files + inline html scripts)
+        run: npm run check:syntax
+
+  # Phase 1 - the real test suites.
+  tests:
+    name: Phase 1 - API + end-to-end tests
+    needs: static-checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # API tests need no browser: they start server.js themselves on a test
+      # port with ADMIN_PASSWORD=test-pass-123.
+      - name: API tests
+        run: npm test
+
+      - name: Install Playwright chromium
+        run: npx playwright install --with-deps chromium
+
+      # playwright.config.js starts its own webServer (port 3780, isolated data
+      # dir), so nothing external has to be running.
+      - name: End-to-end tests
+        run: npm run test:e2e
+
+      - name: Upload Playwright artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-artifacts
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 7
+          if-no-files-found: ignore
