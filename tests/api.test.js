@@ -14,6 +14,7 @@ var spawn = require('child_process').spawn;
 var path = require('path');
 var fs = require('fs');
 var os = require('os');
+var crypto = require('crypto');
 
 var PORT = 3777;
 var BASE = 'http://127.0.0.1:' + PORT;
@@ -254,15 +255,26 @@ test('GET /api/version exposes a build id, and pages embed the same one', async 
 /* Why these matter: the publishing gateway caches per exact URL, and two URLs
  * cached before the no-store fix (/index.html, /orders.html) still return that
  * pre-fix copy part of the time. A URL that has never been requested has no such
- * entry, so /store and /menu are the addresses that are actually safe to bookmark. */
-test('short aliases serve the same pages as the .html paths, with the current build id', async function () {
+ * entry, so the short aliases are the addresses that are actually safe to bookmark.
+ *
+ * English is the default: `/`, `/menu` and `/store` are the addresses we hand out
+ * (the QR code points at `/`) and they serve the English pages. The Chinese pages
+ * keep their `.html` paths and gained `/menu-zh` and `/store-zh`. Each alias is
+ * asserted to serve byte-identical HTML to the file it should point at, so a
+ * mis-routed alias fails here rather than in a customer's browser.
+ * `/menu-en` and `/store-en` are kept working for links already in the wild. */
+test('every advertised address serves the right language page, with the current build id', async function () {
   var v = await (await fetch(BASE + '/api/version')).json();
   var pairs = [
-    ['/menu', '/index.html'],
-    ['/menu-en', '/index-en.html'],
-    ['/store', '/orders.html'],
-    ['/store-en', '/orders-en.html']
+    ['/',         '/index-en.html'],
+    ['/menu',     '/index-en.html'],
+    ['/menu-en',  '/index-en.html'],
+    ['/menu-zh',  '/index.html'],
+    ['/store',    '/orders-en.html'],
+    ['/store-en', '/orders-en.html'],
+    ['/store-zh', '/orders.html']
   ];
+  var fp = function (s) { return crypto.createHash('sha256').update(s).digest('hex').slice(0, 12); };
   for (var i = 0; i < pairs.length; i++) {
     var alias = await fetch(BASE + pairs[i][0]);
     assert.equal(alias.status, 200, pairs[i][0] + ' is not served');
@@ -270,16 +282,21 @@ test('short aliases serve the same pages as the .html paths, with the current bu
     assert.ok(text.indexOf("window.__CX_BUILD__ = '" + v.build + "'") > -1,
       pairs[i][0] + ' does not carry the current build id');
     assert.match(alias.headers.get('cache-control') || '', /no-store/);
+    var target = await (await fetch(BASE + pairs[i][1])).text();
+    assert.equal(fp(text), fp(target),
+      pairs[i][0] + ' does not serve ' + pairs[i][1] + ' (wrong language?)');
   }
 });
 
-test('every internal .html link is cache-busted (a bare link can land on a stale copy)', async function () {
-  var pages = ['/', '/index.html', '/index-en.html', '/orders.html', '/orders-en.html'];
+test('every internal link is cache-busted (a bare link can land on a stale copy)', async function () {
+  var pages = ['/', '/menu', '/menu-zh', '/store', '/store-zh'];
   for (var i = 0; i < pages.length; i++) {
     var html = await (await fetch(BASE + pages[i])).text();
-    var hrefs = html.match(/href="[^"]+\.html[^"]*"/g) || [];
+    /* internal = not an external URL and not a same-page anchor (#stars, #menu) */
+    var hrefs = html.match(/href="(?!#|https?:|mailto:|tel:)[^"]+"/g) || [];
+    assert.ok(hrefs.length > 0, pages[i] + ' has no internal link at all?');
     for (var j = 0; j < hrefs.length; j++) {
-      assert.ok(hrefs[j].indexOf('?v=') > -1 || hrefs[j].indexOf('.html#') > -1,
+      assert.ok(hrefs[j].indexOf('?v=') > -1,
         pages[i] + ' has a bare internal link: ' + hrefs[j]);
     }
   }

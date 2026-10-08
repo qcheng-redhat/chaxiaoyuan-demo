@@ -2,6 +2,9 @@
  * Two-page sync: customer places an order on the menu page,
  * the store dashboard (orders.html) shows it after login.
  * Runs only on the desktop project.
+ *
+ * The customer side drives `/menu-zh` because this spec adds a topping by its
+ * Chinese label ('布丁'). English is the default and lives at `/`.
  */
 'use strict';
 
@@ -17,7 +20,7 @@ test.describe('菜单页 → 订单后台 跨页同步', function () {
     test.skip(testInfo.project.name === 'mobile', 'desktop-only scenario');
 
     // customer places an order
-    await page.goto('/');
+    await page.goto('/menu-zh');
     await h.addProduct(page, 'p1', { addons: ['布丁'] });
     await h.submitOrder(page);
     var noText = await page.locator('#doneNo').textContent();

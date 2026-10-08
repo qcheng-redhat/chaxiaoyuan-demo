@@ -1,6 +1,12 @@
 /*
  * Core ordering flow — the two highest-value cases from the test plan,
  * plus delivery validation, persistence and the double-click guard.
+ *
+ * These specs assert CHINESE labels, so they drive `/menu-zh` instead of `/`:
+ * English is the default now, and `/` would hand them the English page (the
+ * assertions below are the spec sheet drink names, the ice/sugar chips and the
+ * Done button, all of which are translated). The final test covers the English
+ * page, and `tests/api.test.js` asserts which language each address serves.
  */
 'use strict';
 
@@ -11,7 +17,7 @@ var h = require('./helpers');
 test.describe('下单主流程', function () {
 
   test('立即点单 → 选规格 → 加入 → 提交，全程金额正确', async function ({ page }) {
-    await page.goto('/');
+    await page.goto('/menu-zh');
 
     // 1. hero button scrolls to the star products section
     await page.click('#heroOrder');
@@ -44,7 +50,7 @@ test.describe('下单主流程', function () {
   });
 
   test('同一饮品不同规格拆成两行（specKey 逻辑）', async function ({ page }) {
-    await page.goto('/');
+    await page.goto('/menu-zh');
 
     // first: default spec (少冰/半糖)
     await h.addProduct(page, 'p1');
@@ -68,7 +74,7 @@ test.describe('下单主流程', function () {
   });
 
   test('选外送不填手机号 → 拦截并提示，不出单', async function ({ page }) {
-    await page.goto('/');
+    await page.goto('/menu-zh');
     await h.addProduct(page, 'p2');
     await page.click('#pickRow [data-pick="需要外送"]');
 
@@ -83,7 +89,7 @@ test.describe('下单主流程', function () {
   });
 
   test('加购后刷新页面，购物车保留（localStorage 持久化）', async function ({ page }) {
-    await page.goto('/');
+    await page.goto('/menu-zh');
     await h.addProduct(page, 'p3');
     await h.closeCart(page);
     await expect(page.locator('#navCount')).toHaveText('1');
@@ -95,7 +101,7 @@ test.describe('下单主流程', function () {
   });
 
   test('双击防护：同步触发两次提交只发一次请求', async function ({ page }) {
-    await page.goto('/');
+    await page.goto('/menu-zh');
     await h.addProduct(page, 'p4');
 
     var posts = 0;
@@ -117,7 +123,7 @@ test.describe('下单主流程', function () {
 test.describe('下单成功弹窗', function () {
 
   test('「完成」按钮：关闭弹窗和购物车抽屉，回到干净菜单页', async function ({ page }) {
-    await page.goto('/');
+    await page.goto('/menu-zh');
     await h.addProduct(page, 'p1');
     await page.waitForSelector('#drawer.on');
     await h.submitOrder(page);
@@ -134,7 +140,7 @@ test.describe('下单成功弹窗', function () {
   test('矮视口（375×500，横屏/内嵌浏览器）：完成按钮不出屏且可点', async function ({ browser }) {
     var c = await browser.newContext({ viewport: { width: 375, height: 500 } });
     var p = await c.newPage();
-    await p.goto('/');
+    await p.goto('/menu-zh');
     await h.addProduct(p, 'p1');
     await p.waitForSelector('#drawer.on');
     await h.submitOrder(p);

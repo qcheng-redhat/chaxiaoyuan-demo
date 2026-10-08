@@ -210,7 +210,8 @@ window.__CX_BUILD__ = '__BUILD__';
       <div class="brand"><span class="dot">🧋</span>Tea Courtyard <small>· Order Dashboard</small></div>
       <div class="nav-right">
         <span class="live"><i></i>Live sync</span>
-        <a href="menu-en?v=__BUILD__">← Back to menu</a>
+        <a href="menu?v=__BUILD__">← Back to menu</a>
+        <a href="store-zh?v=__BUILD__">中文</a>
         <button id="logoutBtn" class="logout" type="button" style="display:none">Sign out</button>
       </div>
     </nav>
@@ -520,7 +521,7 @@ window.__CX_BUILD__ = '__BUILD__';
       $('#list').innerHTML =
         '<div class="empty"><span class="e">🧋</span>' + msg +
         (list.length ? '' : '<br>Place an order on the menu page, or click "Sample Orders" above to preview') +
-        (list.length ? '' : '<br><a class="go" href="index-en.html?v=__BUILD__">Open Menu Page →</a>') +
+        (list.length ? '' : '<br><a class="go" href="menu?v=__BUILD__">Open Menu Page →</a>') +
         '</div>';
     }else{
       $('#list').innerHTML = arr.map(function(o){

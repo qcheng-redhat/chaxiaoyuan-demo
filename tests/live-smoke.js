@@ -9,6 +9,12 @@
  *   B. dashboard -> log in with the admin password, assert that exact order
  *                   number appears
  *
+ * It follows the DEFAULT language, which is English: `/` is the menu customers
+ * actually get and `/store` is the dashboard the shop is given. That is why the
+ * ice/sugar labels clicked below are the English ones — the Chinese pages use
+ * different strings ('去冰' / '无糖'), and clicking those would silently fail on
+ * an English page.
+ *
  * Why this exists: three separate production-only failures (gateway replacing the
  * Authorization header, a stale cached orders.html, a login modal that could never
  * open) passed every local test and only showed up here. Run this after each publish.
@@ -54,13 +60,13 @@ var log = function (s) { console.log(s); };
       }
     });
 
-    await a.goto(BASE + '/index.html', { waitUntil: 'domcontentloaded' });
+    await a.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
     await a.waitForSelector('#navCart');
 
     await a.click('.add-btn[data-id="p1"]');
     await a.waitForSelector('#sheet.on');
-    await a.click('#sIce .chip[data-v="去冰"]');
-    await a.click('#sSugar .chip[data-v="无糖"]');
+    await a.click('#sIce .chip[data-v="No Ice"]');
+    await a.click('#sSugar .chip[data-v="0% Sugar"]');
     await a.click('#sOk');
     await a.waitForFunction(function () {
       return !document.querySelector('#sheet').classList.contains('on');

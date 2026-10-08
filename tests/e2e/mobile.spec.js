@@ -1,6 +1,9 @@
 /*
  * Mobile smoke test — runs ONLY on the "mobile" project (390x844, touch).
  * Abbreviated version of the main flow to make sure the layout holds up.
+ *
+ * Drives `/menu-zh` (the Chinese menu) because the assertions below are Chinese
+ * labels; English is the default and lives at `/`.
  */
 'use strict';
 
@@ -13,7 +16,7 @@ test.describe('移动端冒烟', function () {
   test('手机视口：主流程走通，弹层不溢出', async function ({ page }, testInfo) {
     test.skip(testInfo.project.name !== 'mobile', 'mobile-only scenario');
 
-    await page.goto('/');
+    await page.goto('/menu-zh');
 
     // hero button visible and leads to products
     await page.click('#heroOrder');
@@ -41,7 +44,7 @@ test.describe('移动端冒烟', function () {
   test('手机视口：菜单行可点，能唤起规格面板', async function ({ page }, testInfo) {
     test.skip(testInfo.project.name !== 'mobile', 'mobile-only scenario');
 
-    await page.goto('/');
+    await page.goto('/menu-zh');
     await page.locator('.menu-row[data-id="m6"]').click();
     await expect(page.locator('#sheet')).toHaveClass(/on/);
     await expect(page.locator('#sName')).toHaveText('四季春柠檬茶');

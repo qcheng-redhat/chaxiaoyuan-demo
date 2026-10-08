@@ -32,9 +32,11 @@
  * A HIT there means the CDN started storing responses we told it not to — the one regression
  * that would silently re-poison every advertised URL.
  *
- * URLs are judged in two classes: the addresses we advertise (`strict` — /, /menu,
- * /menu-en, /store, /store-en) must never serve a pre-fix copy, because those are the entry
- * points customers and the shop actually use. The legacy .html paths are reported for
+ * URLs are judged in two classes: the addresses we advertise (`strict`) must never serve a
+ * pre-fix copy, because those are the entry points customers and the shop actually use.
+ * English is the default, so `/`, `/menu` and `/store` are the primary ones — plus
+ * `/menu-zh` and `/store-zh` for the Chinese pages, and `/menu-en` / `/store-en` kept
+ * working for links already in the wild. The legacy .html paths are reported for
  * information only. Their expired entries cannot be purged on demand — but they do expire on
  * their own, so expect them to go clean eventually and treat a lingering pre-fix copy there
  * as a warning, not an incident.
@@ -50,8 +52,10 @@ var PAGES = [
   { url: '/',           strict: true },
   { url: '/menu',       strict: true },
   { url: '/menu-en',    strict: true },
+  { url: '/menu-zh',    strict: true },
   { url: '/store',      strict: true },
   { url: '/store-en',   strict: true },
+  { url: '/store-zh',   strict: true },
   { url: '/index.html',    strict: false, note: 'legacy path' },
   { url: '/index-en.html', strict: false, note: 'legacy path' },
   { url: '/orders.html',   strict: false, note: 'legacy path' },
@@ -168,6 +172,15 @@ function report(label, r, strict, note) {
   var bustedMenu = await probe('/menu?v=' + build, build);
   report('menu?v=...', bustedMenu, true, 'in-app links');
   if (bustedMenu.prefix > 0 || bustedMenu.fresh < SAMPLES) failures.push('/menu?v=' + build + ' is not reliably current');
+
+  /* The Chinese pages are linked the same way, so they get the same guarantee. */
+  var bustedZh = await probe('/store-zh?v=' + build, build);
+  report('store-zh?v=...', bustedZh, true, 'in-app links');
+  if (bustedZh.prefix > 0 || bustedZh.fresh < SAMPLES) failures.push('/store-zh?v=' + build + ' is not reliably current');
+
+  var bustedMenuZh = await probe('/menu-zh?v=' + build, build);
+  report('menu-zh?v=...', bustedMenuZh, true, 'in-app links');
+  if (bustedMenuZh.prefix > 0 || bustedMenuZh.fresh < SAMPLES) failures.push('/menu-zh?v=' + build + ' is not reliably current');
 
   var leftovers = await (await fetch(BASE + '/store?v=' + build)).text();
   var placeholder = leftovers.indexOf('__BUILD__') > -1;

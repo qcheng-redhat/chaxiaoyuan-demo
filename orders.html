@@ -210,8 +210,8 @@ window.__CX_BUILD__ = '__BUILD__';
       <div class="brand"><span class="dot">🧋</span>茶小院 <small>· 订单后台</small></div>
       <div class="nav-right">
         <span class="live"><i></i>实时同步中</span>
-        <a href="menu?v=__BUILD__">← 返回菜单页</a>
-        <a href="orders-en.html?v=__BUILD__">EN</a>
+        <a href="menu-zh?v=__BUILD__">← 返回菜单页</a>
+        <a href="store?v=__BUILD__">EN</a>
         <button id="logoutBtn" class="logout" type="button" style="display:none">退出登录</button>
       </div>
     </nav>
@@ -521,7 +521,7 @@ window.__CX_BUILD__ = '__BUILD__';
       $('#list').innerHTML =
         '<div class="empty"><span class="e">🧋</span>' + msg +
         (list.length ? '' : '<br>去菜单页下一单，或者点上面的「生成示例订单」看看效果') +
-        (list.length ? '' : '<br><a class="go" href="index.html?v=__BUILD__">打开菜单页 →</a>') +
+        (list.length ? '' : '<br><a class="go" href="menu-zh?v=__BUILD__">打开菜单页 →</a>') +
         '</div>';
     }else{
       $('#list').innerHTML = arr.map(function(o){

@@ -278,17 +278,27 @@ function readBody(req, cb) {
  * dodges it, but a URL nobody can remember is no good to a shop owner who wants to
  * bookmark the dashboard. A brand-new path has no stale gateway entry, so the
  * first request goes to origin and picks up the correct headers. Same file, clean
- * address: /menu, /menu-en, /store, /store-en — and /store is safe to bookmark. */
+ * address: /menu, /menu-en, /store, /store-en — and /store is safe to bookmark.
+ *
+ * ENGLISH IS THE DEFAULT (2026-10-08): `/`, `/menu` and `/store` — the addresses
+ * we hand out, and the one the QR code points at — serve the English pages. The
+ * Chinese pages keep their `.html` paths AND gained their own aliases, /menu-zh
+ * and /store-zh, so the shop can bookmark a Chinese dashboard and nothing that
+ * was already bookmarked 404s. Every in-page language switch links to the alias
+ * for its target language (English -> /menu, /store; Chinese -> /menu-zh,
+ * /store-zh), never to a legacy .html path. */
 var STATIC = {
-  '/':            ['index.html', 'text/html; charset=utf-8'],
-  '/index.html':  ['index.html', 'text/html; charset=utf-8'],
-  '/menu':        ['index.html', 'text/html; charset=utf-8'],
-  '/index-en.html': ['index-en.html', 'text/html; charset=utf-8'],
+  '/':            ['index-en.html', 'text/html; charset=utf-8'],
+  '/menu':        ['index-en.html', 'text/html; charset=utf-8'],
   '/menu-en':     ['index-en.html', 'text/html; charset=utf-8'],
-  '/orders.html': ['orders.html', 'text/html; charset=utf-8'],
-  '/store':       ['orders.html', 'text/html; charset=utf-8'],
-  '/orders-en.html': ['orders-en.html', 'text/html; charset=utf-8'],
+  '/menu-zh':     ['index.html', 'text/html; charset=utf-8'],
+  '/index.html':  ['index.html', 'text/html; charset=utf-8'],
+  '/index-en.html': ['index-en.html', 'text/html; charset=utf-8'],
+  '/store':       ['orders-en.html', 'text/html; charset=utf-8'],
   '/store-en':    ['orders-en.html', 'text/html; charset=utf-8'],
+  '/store-zh':    ['orders.html', 'text/html; charset=utf-8'],
+  '/orders.html': ['orders.html', 'text/html; charset=utf-8'],
+  '/orders-en.html': ['orders-en.html', 'text/html; charset=utf-8'],
   '/qr-code-tea-courtyard.png': ['qr-code-tea-courtyard.png', 'image/png'],
   '/sample_orders_export.csv': ['sample_orders_export.csv', 'text/csv; charset=utf-8']
 };
