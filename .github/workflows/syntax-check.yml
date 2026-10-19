@@ -1,0 +1,37 @@
+name: Syntax check
+
+on:
+  push:
+    paths:
+      - '**.html'
+      - '**.js'
+      - 'tests/**'
+  pull_request:
+    paths:
+      - '**.html'
+      - '**.js'
+      - 'tests/**'
+  workflow_dispatch: {}
+
+jobs:
+  syntax-check:
+    name: Run syntax-check.js
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run syntax check
+        run: npm run check:syntax
