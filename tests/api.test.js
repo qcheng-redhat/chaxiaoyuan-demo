@@ -194,33 +194,29 @@ test('a gateway JWT squatting on Authorization does not break auth (other channe
     headers: { Cookie: 'cy_token=' + encodeURIComponent(token), Authorization: 'Bearer ' + GATEWAY_JWT }
   });
   assert.equal(viaCookie.status, 200);
+});
 
-  var probe = await (await fetch(BASE + '/api/authprobe?token=' + encodeURIComponent(token), {
-    headers: { 'X-Cy-Token': token, Authorization: 'Bearer ' + GATEWAY_JWT }
-  })).json();
-  assert.equal(probe.tokenValid, true);
-  assert.equal(probe.tokenVia, 'xcyheader');
+test('GET /api/authprobe is no longer available', async function () {
+  var r = await fetch(BASE + '/api/authprobe');
+  assert.equal(r.status, 404);
+});
+
+test('login dose not expose diagnostic information', async function () {
+  var r = await req('POST', '/api/login?diag=1', {
+    password: PASS
+  });
+
+  assert.equal(r.body.ok, true);
+  assert.ok(r.body.token);
+  assert.equal(r.body.pid, undefined);
+  assert.equal(r.body.secretFp, undefined);
+  assert.equal(r.body.pwdFp, undefined);
+  assert.equal(r.body.pwdLen, undefined);
 });
 
 test('a lone gateway JWT is still rejected (no auth bypass)', async function () {
   var r = await fetch(BASE + '/api/orders', { headers: { Authorization: 'Bearer ' + GATEWAY_JWT } });
   assert.equal(r.status, 401);
-});
-
-test('authprobe reports how the token arrived', async function () {
-  var p1 = await req('GET', '/api/authprobe');
-  assert.equal(p1.body.tokenVia, 'none');
-  assert.equal(p1.body.tokenValid, false);
-
-  var r = await fetch(BASE + '/api/authprobe?token=' + encodeURIComponent(token));
-  var p2 = await r.json();
-  assert.equal(p2.tokenVia, 'query');
-  assert.equal(p2.tokenValid, true);
-
-  var r3 = await fetch(BASE + '/api/authprobe', { headers: { Authorization: 'Bearer ' + token } });
-  var p3 = await r3.json();
-  assert.equal(p3.tokenVia, 'header');
-  assert.equal(p3.tokenValid, true);
 });
 
 /* ---------- cache headers ---------- */
