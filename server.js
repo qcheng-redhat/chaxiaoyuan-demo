@@ -126,7 +126,7 @@ function tokenValid(t) {
  *   3. cy_token cookie    — survives proxies that rewrite the URL
  *   4. Authorization      — kept as a last resort so plain local runs keep working
  */
-function readToken(req, query, source) {
+function readToken(req, query) {
   var cands = [];
   function add(name, val) {
     if (val != null && String(val).trim() !== '') cands.push({ name: name, val: String(val).trim() });
@@ -145,19 +145,14 @@ function readToken(req, query, source) {
     .filter(function (s) { return s !== ''; })
     .forEach(function (s, i) { add(i ? 'header' + (i + 1) : 'header', s); });
 
-  if (source) source.seen = cands.map(function (c) { return c.name; });
-
   for (var i = 0; i < cands.length; i++) {
     if (tokenValid(cands[i].val)) {
-      if (source) source.via = cands[i].name;
       return cands[i].val;
     }
   }
   if (cands.length) {
-    if (source) source.via = cands[0].name + ':unverified';
     return cands[0].val;
   }
-  if (source) source.via = 'none';
   return '';
 }
 
@@ -416,46 +411,6 @@ var server = http.createServer(function(req, res) {
     return sendJson(res, 200, { ok: true, build: BUILD });
   }
 
-  /* auth probe: reports HOW the token arrived (booleans only, no secrets) —
-   * used to diagnose proxies that strip the Authorization header.
-   * Add ?diag=1 to also get non-secret process fingerprints (which instance
-   * answered, which signing key it holds) — these pin down "the server rejects
-   * its own token" cases caused by multiple instances or a stale process. */
-  if (urlPath === '/api/authprobe' && req.method === 'GET') {
-    var src = {};
-    var tk = readToken(req, query, src);
-    var parts = String(tk).split('.');
-    var expected = parts[0]
-      ? b64url(crypto.createHmac('sha256', TOKEN_SECRET).update(parts[0]).digest())
-      : '';
-    var body = {
-      ok: true,
-      sawAuthorizationHeader: !!req.headers['authorization'],
-      sawCookie: !!req.headers['cookie'],
-      sawXcyHeader: !!req.headers['x-cy-token'],
-      channelsSeen: src.seen || [],
-      tokenVia: src.via,
-      tokenValid: tokenValid(tk),
-      forwardedFor: req.headers['x-forwarded-for'] ? 'present' : 'absent'
-    };
-    if (query && query.diag === '1') {
-      body.tokenLen = String(tk).length;
-      body.partsLen = parts.length;
-      body.receivedSigHead = parts[1] ? parts[1].slice(0, 8) : null;
-      body.expectedSigHead = expected ? expected.slice(0, 8) : null;
-      body.sigMatch = !!(parts[1] && expected && parts[1] === expected);
-      body.payloadHead = parts[0] ? parts[0].slice(0, 24) : null;
-      body.pid = process.pid;
-      body.uptimeSec = Math.round(process.uptime());
-      body.node = process.version;
-      /* fingerprint of the signing key: a hash, not the key — cannot be used to forge */
-      body.secretFp = crypto.createHash('sha256').update(TOKEN_SECRET).digest('hex').slice(0, 8);
-      body.pwdFp = ADMIN_LOGIN_ENABLED ? crypto.createHash('sha256').update(ADMIN_PASSWORD).digest('hex').slice(0, 8) : null;
-      body.pwdLen = ADMIN_LOGIN_ENABLED ? ADMIN_PASSWORD.length : 0;
-    }
-    return sendJson(res, 200, body);
-  }
-
   /* ---------- public: place order ---------- */
   if (urlPath === '/api/orders' && req.method === 'POST') {
     if (!rateLimit('order:' + ip, 30, 60000)) {
@@ -495,15 +450,8 @@ var server = http.createServer(function(req, res) {
       if (!body || cleanStr(body.password, 100) !== ADMIN_PASSWORD) {
         return sendJson(res, 200, { ok: false, error: 'wrong password' });
       }
-      var out = { ok: true, token: issueToken() };
-      if (query && query.diag === '1') {
-        out.pid = process.pid;
-        out.uptimeSec = Math.round(process.uptime());
-        out.secretFp = crypto.createHash('sha256').update(TOKEN_SECRET).digest('hex').slice(0, 8);
-        out.pwdFp = crypto.createHash('sha256').update(ADMIN_PASSWORD).digest('hex').slice(0, 8);
-        out.pwdLen = ADMIN_PASSWORD.length;
-      }
-      return sendJson(res, 200, out);
+      return sendJson(res, 200, { ok: true, token: issueToken()
+      });
     });
   }
 

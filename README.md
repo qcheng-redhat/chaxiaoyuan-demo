@@ -163,7 +163,6 @@ cache headers.
 | --- | --- | --- | --- |
 | `GET` | `/health` | – | Liveness check, returns the order count. |
 | `GET` | `/api/version` | – | Current build id (hash of the HTML pages). |
-| `GET` | `/api/authprobe` | – | Reports how a token arrived and whether it validates. Add `?diag=1` for non-secret process fingerprints. |
 | `POST` | `/api/orders` | – | Place an order. Prices are recomputed server-side; duplicate order numbers return the original. Rate limit: 30/min per IP. |
 | `POST` | `/api/login` | – | `{"password": "..."}` → `{"token": "..."}`. Rate limit: 10 per 5 min per IP. |
 | `GET` | `/api/orders` | ✔ | List all orders, newest first. |
@@ -327,6 +326,12 @@ the aliases, and dropping one turns a language switch into a 404.
 ```
 
 ---
+
+## License
+
+No license file is included yet. Until one is added, all rights are reserved
+and the code may not be reused without permission.
+
 
 ## License
 
