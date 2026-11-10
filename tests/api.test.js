@@ -19,6 +19,7 @@ var crypto = require('crypto');
 var PORT = 3777;
 var BASE = 'http://127.0.0.1:' + PORT;
 var PASS = 'test-pass-123';
+var TEST_TOKEN_SECRET = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
 var child = null;
 var tmpData = fs.mkdtempSync(path.join(os.tmpdir(), 'tea-test-'));
 var token = '';
@@ -49,7 +50,12 @@ function orderBody(no, overrides) {
 
 test.before(async function () {
   child = spawn(process.execPath, [path.join(__dirname, '..', 'server.js')], {
-    env: Object.assign({}, process.env, { PORT: String(PORT), DATA_DIR: tmpData, ADMIN_PASSWORD: PASS }),
+	  env: Object.assign({}, process.env, {
+            PORT: String(PORT),
+	    DATA_DIR: tmpData,
+	    ADMIN_PASSWORD: PASS,
+	    TOKEN_SECRET: TEST_TOKEN_SECRET
+	  }),
     stdio: 'ignore'
   });
   for (var i = 0; i < 50; i++) {
