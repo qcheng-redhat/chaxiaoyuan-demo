@@ -71,18 +71,33 @@ function persistDb() {
   }
 }
 
-/* ---------- Auth tokens: stateless HMAC-signed, survive restarts / multiple instances ----------
- * The secret is derived from the admin password (plus a fixed label) so every instance
- * computes the same key without shared storage. The first secret wins for the process
- * lifetime, which keeps old tokens verifiable across a password change window.
+/* ---------- Auth tokens: stateless HMAC-signed ----------
+ * ADMIN_PASSWORD authenticates the administrator.
+ * TOKEN_SECRET independently signs and verifies authentication tokens.
  *
- * With NO password configured, a RANDOM per-process secret is used instead. Login is
- * disabled in that mode anyway, and the randomness guarantees two things: nobody can
- * forge a token by recomputing the well-known derivation for an empty password, and
- * every token issued under a previous configuration stops verifying immediately. */
-var TOKEN_SECRET = ADMIN_LOGIN_ENABLED
-  ? crypto.createHash('sha256').update('tea-courtyard-token-v1|' + ADMIN_PASSWORD).digest()
-  : crypto.randomBytes(32);
+ * When dashboard login is enabled, TOKEN_SECRET must be configured as
+ * 64 hexadecimal characters (32 random bytes). Never derive it from
+ * ADMIN_PASSWORD.
+ *
+ * When dashboard login is disabled, use a random per-process secret.
+ * Customer-facing functionality remains available without either variable.
+ */
+
+var TOKEN_SECRET_VALUE = process.env.TOKEN_SECRET || '';
+var TOKEN_SECRET;
+
+if (ADMIN_LOGIN_ENABLED) {
+  if (!/^[0-9a-fA-F]{64}$/.test(TOKEN_SECRET_VALUE)) {
+    throw new Error(
+      '[tea-courtyard] TOKEN_SECRET must be set to 64 hexadecimal characters ' +
+      '(generate it with crypto.randomBytes(32).toString("hex")).'
+    );
+  }
+
+  TOKEN_SECRET = Buffer.from(TOKEN_SECRET_VALUE, 'hex');
+} else {
+  TOKEN_SECRET = crypto.randomBytes(32);
+}
 
 function b64url(buf) {
   return buf.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');

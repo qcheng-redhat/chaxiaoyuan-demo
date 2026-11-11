@@ -97,24 +97,38 @@ file, and **no password is hard-coded anywhere in this repository**.
 | --- | --- | --- |
 | `PORT` | `3000` | Port to listen on (binds `0.0.0.0`). |
 | `ADMIN_PASSWORD` | *(empty)* | Password for the store dashboard. **Optional by design** — see below. |
+| `TOKEN_SECRET` | *(unset)* | Independent token-signing secret. Required when `ADMIN_PASSWORD` is set; must be exactly 64 hexadecimal characters (32 bytes). |
 | `DATA_DIR` | `./data` | Directory holding `orders.json`. Point it somewhere else to keep test data separate. |
 
 ```bash
-# Typical local run with a dashboard password
-ADMIN_PASSWORD=my-secret npm start
+# Generate a secure token-signing secret
+node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"
+
+# Typical local run with dashboard login enabled
+ADMIN_PASSWORD=my-secret TOKEN_SECRET="<64-hex-secret>" npm start
 
 # Windows PowerShell
-$env:ADMIN_PASSWORD = "my-secret"; npm start
-```
+$env:ADMIN_PASSWORD = "my-secret"
+$env:TOKEN_SECRET = "<64-hex-secret>"
+npm start
 
-**If `ADMIN_PASSWORD` is not set, the site still starts normally.** Customers
-can browse and order exactly as usual; only the dashboard login is disabled. In
-that mode `POST /api/login` answers
-`{"ok": false, "reason": "not_configured"}` so the UI can say "login is not
-configured on the server" instead of the misleading "wrong password". The token
-signing key then becomes a random per-process value, which means nobody can
-forge a token by recomputing the derivation for an empty password, and any token
-issued under a previous configuration stops working immediately.
+**If `ADMIN_PASSWORD` is not set, the site still starts normally.**  Customers
+can browse and order exactly as usual; only dashboard login is disabled. In
+this mode, `TOKEN_SECRET` is not required and the server uses a random
+per-process signing key.
+
+**If `ADMIN_PASSWORD` is set, `TOKEN_SECRET` is mandatory.** The server refuses
+to start if it is missing or is not exactly 64 hexadecimal characters.
+`TOKEN_SECRET` is independent of `ADMIN_PASSWORD` and must be generated and
+managed separately.
+
+Changing `ADMIN_PASSWORD` changes the login password but does not automatically
+invalidate existing tokens. Changing `TOKEN_SECRET` invalidates all previously
+issued tokens, requiring administrators to log in again.
+
+When dashboard login is disabled, `TOKEN_SECRET` is not required. The server
+uses a random per-process signing key. Any tokens issued under a previous
+server process or configuration will no longer be valid.
 
 ---
 
@@ -149,8 +163,10 @@ order rather than creating a second one.
    in-browser token and the cookie.
 
 The dashboard password can be changed at any time by restarting the process with
-a different `ADMIN_PASSWORD`. Tokens are signed with a key derived from the
-password, so all previously issued tokens stop validating after the change.
+a different `ADMIN_PASSWORD`. Token signing uses the independent `TOKEN_SECRET`,
+so changing the dashboard password alone does not invalidate existing tokens.
+To invalidate all previously issued tokens, change `TOKEN_SECRET` and restart
+the process.
 
 ---
 

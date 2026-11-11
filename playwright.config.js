@@ -26,7 +26,8 @@ module.exports = {
     env: Object.assign({}, process.env, {
       PORT: '3780',
       DATA_DIR: '.playwright-data',
-      ADMIN_PASSWORD: 'test-pass-123'
+      ADMIN_PASSWORD: 'test-pass-123',
+      TOKEN_SECRET: '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
     })
   },
   projects: [
