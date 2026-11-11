@@ -11,6 +11,7 @@
 var test = require('node:test');
 var assert = require('node:assert');
 var spawn = require('child_process').spawn;
+var spawnSync = require('child_process').spawnSync;
 var path = require('path');
 var fs = require('fs');
 var os = require('os');
@@ -23,6 +24,38 @@ var TEST_TOKEN_SECRET = '0123456789abcdef0123456789abcdef0123456789abcdef0123456
 var child = null;
 var tmpData = fs.mkdtempSync(path.join(os.tmpdir(), 'tea-test-'));
 var token = '';
+
+function runServerForTokenValidation(tokenSecret) {
+  var dataDir = fs.mkdtempSync(
+    path.join(os.tmpdir(), 'tea-token-validation-')
+  );
+
+  var env = Object.assign({}, process.env, {
+    PORT: '0',
+    DATA_DIR: dataDir,
+    ADMIN_PASSWORD: PASS
+  });
+
+  delete env.TOKEN_SECRET;
+
+  if (tokenSecret !== undefined) {
+    env.TOKEN_SECRET = tokenSecret;
+  }
+
+  try {
+    return spawnSync(
+      process.execPath,
+      [path.join(__dirname, '..', 'server.js')],
+      {
+        env: env,
+        encoding: 'utf8',
+        timeout: 5000
+      }
+    );
+  } finally {
+    fs.rmSync(dataDir, { recursive: true, force: true });
+  }
+}
 
 function req(method, p, body, auth) {
   var headers = { 'Content-Type': 'application/json' };
@@ -409,4 +442,28 @@ test('no ADMIN_PASSWORD: a token forged with the well-known empty-password secre
   var r = await req2('GET', '/api/orders', undefined, { 'X-Cy-Token': forged });
   assert.equal(r.status, 401);
   assert.equal(r.body.ok, false);
+});
+
+/* ---------- TOKEN_SECRET startup validation ---------- */
+
+test('server refuses to start when TOKEN_SECRET is missing', function () {
+  var result = runServerForTokenValidation(undefined);
+
+  assert.ifError(result.error);
+  assert.notEqual(result.status, 0);
+  assert.match(
+    result.stderr,
+    /TOKEN_SECRET must be set to 64 hexadecimal characters/
+  );
+});
+
+test('server refuses to start when TOKEN_SECRET is malformed', function () {
+  var result = runServerForTokenValidation('not-a-valid-secret');
+
+  assert.ifError(result.error);
+  assert.notEqual(result.status, 0);
+  assert.match(
+    result.stderr,
+    /TOKEN_SECRET must be set to 64 hexadecimal characters/
+  );
 });
